@@ -11,13 +11,12 @@
 body {
     min-height: 100vh;
     background: linear-gradient(125deg,
-            #ff7eb3,
-            #ff758c,
-            #ff8c42,
-            #ffd700,
-            #b388ff,
-            #8c9eff);
-    background-size: 300% 300%;
+            #FFD700 0%,
+            #FF8C42 25%,
+            #FF4081 50%,
+            #7C4DFF 75%,
+            #448AFF 100%);
+    background-size: 400% 400%;
     animation: gradientMove 35s ease infinite;
     position: relative;
     overflow-x: hidden;
@@ -53,20 +52,21 @@ body {
     text-align: center;
     position: relative;
     flex-shrink: 0;
-    height: 25vh;
+    height: 30vh;
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 2.88vh 0;
+    padding: 2vh 0;
 }
 
 .info-section {
-    padding: 2rem;
-    background: rgba(255, 255, 255, 0.2);
-    backdrop-filter: blur(10px);
-    border-radius: 30px;
+    padding: 1.5rem 3rem;
+    background: rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(20px);
+    border-radius: 40px;
     display: inline-block;
-    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 15px 50px rgba(0, 0, 0, 0.15);
+    border: 1px solid rgba(255, 255, 255, 0.2);
     max-height: 100%;
 }
 
@@ -80,10 +80,10 @@ body {
 }
 
 .show-title {
-    font-size: 4.5rem;
-    font-weight: 400;
+    font-size: 5rem;
+    font-weight: 600;
     color: white;
-    text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.3);
+    text-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
     margin-bottom: 0.5rem;
     line-height: 1;
     animation: titlePulse 3s ease-in-out infinite;
@@ -152,9 +152,9 @@ body {
     align-items: flex-start;
     gap: 3rem;
     margin: 0 auto;
-    padding: 0 2rem 2.88vh 2rem;
+    padding: 2vh 1rem 5vh 1rem;
     flex: 1;
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
     overflow-y: auto;
     overflow-x: hidden;
     box-sizing: border-box;
@@ -172,8 +172,11 @@ body {
     flex-shrink: 0;
     animation: slideUp 0.5s ease forwards;
     opacity: 0;
-    gap: 2.88vh;
-    max-height: 100%;
+    gap: 1.5vh;
+    width: calc(100% / var(--team-count, 4));
+    max-width: 400px;
+    height: 100%;
+    position: relative;
 }
 
 .team-column:nth-child(1) {
@@ -233,6 +236,7 @@ body {
     position: relative;
     overflow: hidden;
     flex-shrink: 0;
+    z-index: 5;
 }
 
 .team-circle::before {
@@ -281,40 +285,44 @@ body {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 0.35rem;
-    width: 220px;
-    max-height: calc(100vh - 25vh - 2.88vh - 9.6vh - 2.88vh - 2.88vh - 2.88vh);
-    overflow: hidden;
-    padding: 0 5px;
+    gap: var(--slot-gap, 0.5rem);
+    width: 100%;
+    padding: 0 10px;
     flex: 1;
+    overflow: visible;
 }
 
 
-/* Player Slot */
+/* Player Slot - Enhanced Glassmorphism */
 .team-slot {
-    background: linear-gradient(135deg, #F8D2BA 0%, #AB13A8 100%);
-    color: white;
-    padding: 0.3rem 0.7rem;
-    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.95);
+    color: #2c3e50;
+    padding: var(--slot-padding-v, 0.5rem) var(--slot-padding-h, 1rem);
+    border-radius: var(--slot-radius, 15px);
     text-align: center;
     width: 100%;
-    min-height: 1.8rem;
-    font-size: 1.1rem;
-    font-weight: 500;
-    word-wrap: break-word;
-    overflow-wrap: break-word;
-    hyphens: auto;
-    border: 2px solid rgba(255, 255, 255, 0.8);
-    box-shadow: 0 4px 12px rgba(171, 19, 168, 0.3);
-    transition: all 0.3s ease;
-    position: relative;
-    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
+    min-height: var(--slot-min-height, 2rem);
+    font-size: var(--slot-font-size, 1.4rem);
+    font-weight: 600;
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     display: flex;
     align-items: center;
     justify-content: center;
-    flex-wrap: nowrap;
-    line-height: 1.1;
-    gap: 0.25rem;
+    position: relative;
+    overflow: hidden;
+}
+
+.team-slot::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, rgba(255,255,255,0.4) 0%, transparent 100%);
+    pointer-events: none;
 }
 
 .team-slot:hover {
@@ -330,31 +338,76 @@ body {
 }
 
 .team-slot .player-name {
-    word-break: break-word;
-    overflow-wrap: break-word;
-    text-align: center;
     flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
-/* New player animation */
-.team-slot.new-player {
-    animation: newPlayerPop 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+/* Flash animation for existing items when something happens */
+@keyframes itemHighlight {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.05); background: rgba(255, 255, 255, 1); }
 }
 
-@keyframes newPlayerPop {
-    0% {
-        transform: scale(0) rotate(-180deg);
-        opacity: 0;
-    }
+/* Name Announcement Overlay */
+.announcement-overlay {
+    position: fixed;
+    bottom: 50px;
+    left: 50%;
+    transform: translateX(-50%) translateY(100px);
+    background: rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(30px);
+    padding: 2rem 4rem;
+    border-radius: 30px;
+    border: 2px solid rgba(255, 255, 255, 0.4);
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3), 0 0 100px rgba(255, 255, 255, 0.2);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    opacity: 0;
+    transition: all 0.8s cubic-bezier(0.19, 1, 0.22, 1);
+}
 
-    50% {
-        transform: scale(1.2) rotate(10deg);
-    }
+.announcement-overlay.show {
+    transform: translateX(-50%) translateY(0);
+    opacity: 1;
+}
 
-    100% {
-        transform: scale(1) rotate(0deg);
-        opacity: 1;
-    }
+.announcement-label {
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 1.5rem;
+    text-transform: uppercase;
+    letter-spacing: 5px;
+    margin-bottom: 0.5rem;
+}
+
+.announcement-name {
+    color: white;
+    font-size: 5rem;
+    font-weight: 600;
+    text-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+}
+
+/* Flying Name Shadow */
+.flying-name {
+    position: fixed;
+    background: white;
+    color: #2c3e50;
+    padding: var(--slot-padding-v, 0.5rem) var(--slot-padding-h, 1rem);
+    border-radius: var(--slot-radius, 15px);
+    font-size: var(--slot-font-size, 1.4rem);
+    font-weight: 600;
+    z-index: 2000;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
+    white-space: nowrap;
+    transition: all 1.2s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 /* Status Indicator */

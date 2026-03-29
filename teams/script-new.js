@@ -10,7 +10,9 @@ class TeamXDisplay {
         this.currentGameId = null;
         this.playersByTeam = {};
         this.autoRefreshInterval = null;
-        this.isFullscreen = false;
+        this.isFirstLoad = true;
+        this.isAnnouncing = false;
+        this.announcementQueue = [];
 
         this.initializeElements();
         this.initialize();
@@ -23,8 +25,12 @@ class TeamXDisplay {
             teamsContainer: document.getElementById('teamsContainer'),
             statusDot: document.querySelector('.status-dot'),
             statusText: document.querySelector('.status-text'),
-            fullscreenHint: document.querySelector('.fullscreen-hint')
+            fullscreenHint: document.querySelector('.fullscreen-hint'),
+            container: document.querySelector('.container')
         };
+
+        // Create announcement overlay if it doesn't exist
+        this.createAnnouncementOverlay();
     }
 
     async initialize() {
@@ -33,8 +39,10 @@ class TeamXDisplay {
             await this.authenticatePocketBase();
             await this.loadGameData();
             await this.loadAndDisplayTeams();
+            this.isFirstLoad = false;
             this.setupRealtimeUpdates();
             this.setupAutoRefresh();
+            this.setupResizeHandler();
             this.setStatus('live');
         } catch (error) {
             console.error('Initialization failed:', error);
@@ -107,6 +115,63 @@ class TeamXDisplay {
 
     setTeamCountCSS(teamCount) {
         document.documentElement.style.setProperty('--team-count', teamCount);
+        this.calculateDynamicSizing();
+    }
+
+    setupResizeHandler() {
+        window.addEventListener('resize', () => {
+            clearTimeout(this.resizeTimeout);
+            this.resizeTimeout = setTimeout(() => {
+                this.calculateDynamicSizing();
+            }, 250);
+        });
+    }
+
+    calculateDynamicSizing() {
+        if (!this.gameRecord) return;
+
+        const containerHeight = this.elements.teamsContainer.offsetHeight;
+        const headerHeight = document.querySelector('.header').offsetHeight;
+        const availableHeight = containerHeight; // teams-container is flex:1
+
+        // Guess max players per team (use actual if possible, otherwise assume 10)
+        let maxPlayers = 0;
+        for (let i = 1; i <= this.gameRecord.teamnumber; i++) {
+            maxPlayers = Math.max(maxPlayers, (this.playersByTeam[i] || []).length);
+        }
+        
+        // Ensure at least 6 slots of space for growth
+        const slotsToFit = Math.max(maxPlayers + 1, 8);
+        
+        // Calculate size (circles are ~10vh)
+        const teamCircleHeight = window.innerHeight * 0.1;
+        const spacing = window.innerHeight * 0.05;
+        const availableForSlots = availableHeight - teamCircleHeight - spacing;
+        
+        const slotHeight = Math.floor(availableForSlots / slotsToFit);
+        const fontSize = Math.max(1, Math.min(2.5, slotHeight / 25)) + 'rem';
+        const paddingV = Math.max(0.2, slotHeight / 100) + 'rem';
+        const gap = Math.max(0.1, slotHeight / 150) + 'rem';
+
+        const root = document.documentElement;
+        root.style.setProperty('--slot-font-size', fontSize);
+        root.style.setProperty('--slot-padding-v', paddingV);
+        root.style.setProperty('--slot-min-height', slotHeight + 'px');
+        root.style.setProperty('--slot-gap', gap);
+        
+        console.log(`Dynamic Sizing: Fit ${slotsToFit} slots in ${availableForSlots}px -> ${slotHeight}px slot`);
+    }
+
+    createAnnouncementOverlay() {
+        const overlay = document.createElement('div');
+        overlay.className = 'announcement-overlay';
+        overlay.innerHTML = `
+            <div class="announcement-label">Nieuwe speler!</div>
+            <div class="announcement-name" id="announcementName"></div>
+        `;
+        document.body.appendChild(overlay);
+        this.elements.announcementOverlay = overlay;
+        this.elements.announcementName = document.getElementById('announcementName');
     }
 
     async loadAndDisplayTeams() {
@@ -196,6 +261,7 @@ class TeamXDisplay {
             }
         }
 
+        this.calculateDynamicSizing();
         console.log('Display updated');
     }
 
@@ -250,19 +316,21 @@ class TeamXDisplay {
 
             if (!slot) {
                 slot = this.createPlayerSlot(player);
-                slot.classList.add('new-player');
-
-                // Insert at correct position
-                if (index < playersContainer.children.length) {
-                    playersContainer.insertBefore(slot, playersContainer.children[index]);
+                
+                // If not first load, trigger animation
+                if (!this.isFirstLoad) {
+                    slot.style.opacity = '0'; // Hide initially
+                    this.queueAnnouncement(player, slot, playersContainer, index);
                 } else {
-                    playersContainer.appendChild(slot);
+                    // Normal insertion for first load
+                    if (index < playersContainer.children.length) {
+                        playersContainer.insertBefore(slot, playersContainer.children[index]);
+                    } else {
+                        playersContainer.appendChild(slot);
+                    }
                 }
 
-                // Remove animation class after animation completes
-                setTimeout(() => {
-                    slot.classList.remove('new-player');
-                }, 600);
+                // Handled by announcement logic or isFirstLoad
             } else {
                 // Update existing slot if needed
                 const nameSpan = slot.querySelector('.player-name');
@@ -270,6 +338,80 @@ class TeamXDisplay {
                     nameSpan.textContent = player.naam;
                 }
             }
+        });
+    }
+
+    queueAnnouncement(player, finalSlot, container, index) {
+        this.announcementQueue.push({ player, finalSlot, container, index });
+        this.processAnnouncementQueue();
+    }
+
+    async processAnnouncementQueue() {
+        if (this.isAnnouncing || this.announcementQueue.length === 0) return;
+
+        this.isAnnouncing = true;
+        const { player, finalSlot, container, index } = this.announcementQueue.shift();
+
+        await this.announceAndFlyPlayer(player, finalSlot, container, index);
+
+        this.isAnnouncing = false;
+        if (this.announcementQueue.length > 0) {
+            setTimeout(() => this.processAnnouncementQueue(), 500);
+        }
+    }
+
+    async announceAndFlyPlayer(player, finalSlot, container, index) {
+        return new Promise(resolve => {
+            // 1. Setup Announcement
+            this.elements.announcementName.textContent = player.naam;
+            this.elements.announcementOverlay.classList.add('show');
+            
+            // Re-calculate sizing in case many players added
+            this.calculateDynamicSizing();
+
+            setTimeout(() => {
+                // 2. Prepare for flight
+                // Insert the invisible final slot to get its dimensions/position
+                if (index < container.children.length) {
+                    container.insertBefore(finalSlot, container.children[index]);
+                } else {
+                    container.appendChild(finalSlot);
+                }
+
+                const targetRect = finalSlot.getBoundingClientRect();
+                const startRect = this.elements.announcementName.getBoundingClientRect();
+
+                // 3. Create flying shadow
+                const flyer = document.createElement('div');
+                flyer.className = 'flying-name';
+                flyer.textContent = player.naam;
+                flyer.style.top = startRect.top + 'px';
+                flyer.style.left = startRect.left + 'px';
+                flyer.style.width = startRect.width + 'px';
+                flyer.style.height = startRect.height + 'px';
+                document.body.appendChild(flyer);
+
+                // 4. Start flight
+                this.elements.announcementOverlay.classList.remove('show');
+                
+                // Small delay to ensure browser paints flyer before animation
+                requestAnimationFrame(() => {
+                    flyer.style.top = targetRect.top + 'px';
+                    flyer.style.left = targetRect.left + 'px';
+                    flyer.style.width = targetRect.width + 'px';
+                    flyer.style.height = targetRect.height + 'px';
+                    flyer.style.fontSize = getComputedStyle(document.documentElement).getPropertyValue('--slot-font-size');
+
+                    setTimeout(() => {
+                        // 5. Land
+                        finalSlot.style.opacity = '1';
+                        finalSlot.style.animation = 'itemHighlight 0.5s ease';
+                        flyer.remove();
+                        resolve();
+                    }, 1200); // Matches transition duration in CSS
+                });
+
+            }, 2000); // Time showing the big name at bottom
         });
     }
 
