@@ -152,9 +152,11 @@ body {
     align-items: flex-start;
     gap: 3rem;
     margin: 0 auto;
-    padding: 2vh 1rem 5vh 1rem;
+    padding: 2vh 0.5rem 5vh 0.5rem;
     flex: 1;
     flex-wrap: nowrap;
+    width: 100%;
+    gap: 1.5rem;
     overflow-y: auto;
     overflow-x: hidden;
     box-sizing: border-box;
@@ -174,7 +176,6 @@ body {
     opacity: 0;
     gap: 1.5vh;
     width: calc(100% / var(--team-count, 4));
-    max-width: 400px;
     height: 100%;
     position: relative;
 }
@@ -323,10 +324,11 @@ body {
 }
 
 .team-slot .player-number {
-    font-size: 0.75em;
+    font-size: 0.6em;
     color: rgba(0, 0, 0, 0.7);
     font-weight: 600;
     flex-shrink: 0;
+    margin-right: 0.5rem;
 }
 
 .team-slot .player-name {
@@ -348,12 +350,11 @@ body {
     bottom: 50px;
     left: 50%;
     transform: translateX(-50%) translateY(100px);
-    background: rgba(255, 255, 255, 0.2);
-    backdrop-filter: blur(30px);
+    background: linear-gradient(135deg, #F8D2BA 0%, #AB13A8 100%);
     padding: 2rem 4rem;
     border-radius: 30px;
-    border: 2px solid rgba(255, 255, 255, 0.4);
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3), 0 0 100px rgba(255, 255, 255, 0.2);
+    border: 3px solid rgba(255, 255, 255, 0.8);
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3), 0 0 100px rgba(171, 19, 168, 0.4);
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -378,21 +379,22 @@ body {
 
 .announcement-name {
     color: white;
-    font-size: 5rem;
+    font-size: 6rem;
     font-weight: 600;
-    text-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
 }
 
 /* Flying Name Shadow */
 .flying-name {
     position: fixed;
-    background: white;
-    color: #2c3e50;
+    background: linear-gradient(135deg, #F8D2BA 0%, #AB13A8 100%);
+    color: white;
     padding: var(--slot-padding-v, 0.5rem) var(--slot-padding-h, 1rem);
     border-radius: var(--slot-radius, 15px);
     font-size: var(--slot-font-size, 1.4rem);
     font-weight: 600;
     z-index: 2000;
+    border: 2px solid rgba(255, 255, 255, 0.8);
     box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
     display: flex;
     align-items: center;
