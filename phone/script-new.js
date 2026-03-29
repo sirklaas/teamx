@@ -157,12 +157,25 @@ class TeamXRegistration {
         const name = this.elements.playerNameInput.value.trim();
         if (!name) return;
 
-        const existingPlayer = await this.checkExistingName(name);
+        // Disable input and button immediately to prevent multiple clicks
+        this.elements.playerNameInput.disabled = true;
+        this.elements.enterButton.disabled = true;
+        this.showLoading(true);
 
-        if (existingPlayer.exists) {
-            this.showNameModal(name, existingPlayer.player);
-        } else {
-            this.addToPlayerQueue(name);
+        try {
+            const existingPlayer = await this.checkExistingName(name);
+
+            if (existingPlayer.exists) {
+                this.showNameModal(name, existingPlayer.player);
+                this.showLoading(false);
+            } else {
+                this.addToPlayerQueue(name);
+            }
+        } catch (error) {
+            console.error('Submission error:', error);
+            this.elements.playerNameInput.disabled = false;
+            this.elements.enterButton.disabled = false;
+            this.showLoading(false);
         }
     }
 
@@ -211,6 +224,10 @@ class TeamXRegistration {
 
     closeModal() {
         this.elements.nameModal.classList.remove('show');
+        // Re-enable input if modal is closed (in case they want to change name)
+        this.elements.playerNameInput.disabled = false;
+        this.elements.enterButton.disabled = false;
+        this.elements.playerNameInput.focus();
     }
 
     showExistingTeam(player) {
@@ -262,6 +279,14 @@ class TeamXRegistration {
 
             const playerdata = currentShow.playerData || [];
             console.log('Current playerdata length:', playerdata.length);
+
+            // CRITICAL: Final check for duplicates before adding (race condition guard)
+            const existingPlayer = playerdata.find(p => p.naam && p.naam.toLowerCase() === name.toLowerCase());
+            if (existingPlayer) {
+                console.log('Name already exists in latest playerdata, showing existing team');
+                this.showTeamAssignment(existingPlayer);
+                return;
+            }
 
             // Get unique player number
             const playerNumber = this.getNextPlayerNumber(playerdata);
@@ -430,6 +455,13 @@ class TeamXRegistration {
         this.elements.playerInfo.classList.remove('show');
         this.elements.numberCircle.classList.remove('show', 'pulse');
         this.elements.confirmButton.classList.remove('show');
+        
+        // Re-enable input
+        this.elements.playerNameInput.disabled = false;
+        this.elements.enterButton.disabled = false;
+        this.elements.playerNameInput.value = '';
+        this.elements.playerNameInput.focus();
+        
         this.showLoading(false);
     }
 
