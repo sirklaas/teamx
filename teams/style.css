@@ -152,7 +152,7 @@ body {
     align-items: flex-start;
     gap: 3rem;
     margin: 0 auto;
-    padding: 5vh 2rem 5vh 2rem; /* 5vh top room for circles, 5vh bottom for margin */
+    padding: 1vh 2rem 5vh 2rem; /* Reduced top room to move circles higher up */
     flex: 1;
     flex-wrap: nowrap;
     width: 100%;
@@ -327,7 +327,7 @@ body {
 
 .team-slot .player-number {
     font-size: 0.6em;
-    color: rgba(0, 0, 0, 0.7);
+    color: rgba(0, 0, 0, 0.4);
     font-weight: 600;
     flex-shrink: 0;
     margin-right: 0.5rem;
