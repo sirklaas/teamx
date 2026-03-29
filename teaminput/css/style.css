@@ -1,0 +1,273 @@
+/**
+ * TeamX Input - Clean Design (Screenshot Match)
+ * Barlow Semi Condensed 400 for all text
+ * Optimized for 42" screen
+ */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Barlow Semi Condensed', sans-serif;
+    font-weight: 400;
+    line-height: 1.5;
+    color: #6c757d;
+    background-color: #f0f0f0;
+    overflow: hidden;
+    height: 100vh;
+}
+
+.container {
+    max-width: 2400px;
+    height: 100vh;
+    margin: 0 auto;
+    padding: 20px;
+    overflow: hidden;
+}
+
+.teamx-blocks-container {
+    display: flex;
+    overflow-x: auto;
+    overflow-y: hidden;
+    gap: 20px;
+    height: calc(100vh - 40px);
+    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
+    padding: 10px 5px;
+}
+
+.teamx-blocks-container::-webkit-scrollbar {
+    height: 10px;
+}
+
+.teamx-blocks-container::-webkit-scrollbar-track {
+    background: #e0e0e0;
+    border-radius: 5px;
+}
+
+.teamx-blocks-container::-webkit-scrollbar-thumb {
+    background: #adb5bd;
+    border-radius: 5px;
+}
+
+.teamx-blocks-container::-webkit-scrollbar-thumb:hover {
+    background: #868e96;
+}
+
+.teamx-block {
+    min-width: 380px;
+    max-width: 380px;
+    flex-shrink: 0;
+    background: #ffffff;
+    border: none;
+    border-radius: 12px;
+    padding: 30px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    overflow-y: auto;
+    height: 100%;
+}
+
+.teamx-block::-webkit-scrollbar {
+    width: 6px;
+}
+
+.teamx-block::-webkit-scrollbar-track {
+    background: #f8f9fa;
+}
+
+.teamx-block::-webkit-scrollbar-thumb {
+    background: #dee2e6;
+    border-radius: 3px;
+}
+
+.teamx-block.blank-form {
+    background: #f8f9fa;
+    margin-right: 40px;
+    /* Extra space after Nieuw Show block */
+}
+
+.teamx-block[data-priority="0"] {
+    display: none !important;
+}
+
+/* Form rows for side-by-side fields */
+.form-row {
+    display: flex;
+    gap: 15px;
+}
+
+.form-row .form-field {
+    flex: 1;
+}
+
+/* Radio buttons inline */
+.radio-inline {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    align-items: center;
+}
+
+.radio-inline label {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    margin-bottom: 0;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.radio-inline input[type="radio"] {
+    width: auto;
+    margin: 0;
+    cursor: pointer;
+}
+
+.teamx-block h3 {
+    font-family: 'Barlow Semi Condensed', sans-serif;
+    font-weight: 400;
+    font-size: 20px;
+    color: #6c757d;
+    margin-bottom: 8px;
+    padding-bottom: 0;
+    border-bottom: none;
+}
+
+.date-display {
+    font-family: 'Barlow Semi Condensed', sans-serif;
+    font-weight: 400;
+    font-size: 14px;
+    color: #868e96;
+    margin-bottom: 15px;
+}
+
+.date-display-small {
+    font-family: 'Barlow Semi Condensed', sans-serif;
+    font-weight: 400;
+    font-size: 12px;
+    color: #868e96;
+    margin-top: 5px;
+}
+
+/* Divider line */
+.divider {
+    height: 1px;
+    background: #dee2e6;
+    margin: 15px 0;
+}
+
+/* Radio box container */
+.radio-box {
+    background: #f8f9fa;
+    border: 1px solid #e0e0e0;
+    border-radius: 6px;
+    padding: 10px 12px;
+}
+
+/* Extra spacing before Notities */
+.notities-field {
+    margin-top: 25px !important;
+}
+
+.game-form {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+}
+
+.form-field {
+    margin-bottom: 0;
+}
+
+.form-field label {
+    display: block;
+    font-family: 'Barlow Semi Condensed', sans-serif;
+    font-weight: 400;
+    font-size: 15px;
+    color: #6c757d;
+    margin-bottom: 8px;
+}
+
+.form-field input[type="text"],
+.form-field input[type="number"],
+.form-field input[type="date"],
+.form-field input[type="time"],
+.form-field select,
+.form-field textarea {
+    width: 100%;
+    padding: 12px 14px;
+    border: 1px solid #e0e0e0;
+    border-radius: 6px;
+    font-family: 'Barlow Semi Condensed', sans-serif;
+    font-weight: 400;
+    font-size: 15px;
+    color: #495057;
+    background: #ffffff;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.form-field input[type="text"]:focus,
+.form-field input[type="number"]:focus,
+.form-field input[type="date"]:focus,
+.form-field input[type="time"]:focus,
+.form-field select:focus,
+.form-field textarea:focus {
+    outline: none;
+    border-color: #adb5bd;
+    box-shadow: 0 0 0 3px rgba(173, 181, 189, 0.1);
+}
+
+.form-field textarea {
+    resize: vertical;
+    min-height: 100px;
+    font-family: 'Barlow Semi Condensed', sans-serif;
+}
+
+.form-field input::placeholder,
+.form-field textarea::placeholder {
+    color: #adb5bd;
+    font-style: normal;
+}
+
+.btn-save {
+    width: 100%;
+    padding: 14px;
+    background: #007bff;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-family: 'Barlow Semi Condensed', sans-serif;
+    font-weight: 400;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background 0.2s;
+    margin-top: 10px;
+}
+
+/* Top row (date / time / eventbureau) */
+.form-row-top {
+    gap: 12px;
+}
+
+.btn-save:hover {
+    background: #0056b3;
+}
+
+.btn-save:active {
+    transform: scale(0.98);
+}
+
+.hidden {
+    display: none !important;
+}
+
+.priority-note {
+    font-size: 13px;
+    color: #dc3545;
+    text-align: center;
+    margin-top: 10px;
+    font-style: italic;
+}

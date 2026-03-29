@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="nl">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TeamX - Team Overview</title>
+    <link href="https://fonts.googleapis.com/css2?family=Barlow+Semi+Condensed:wght@400;600&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <div class="container">
+        <!-- Header with title and QR code -->
+        <div class="header">
+            <div class="info-section">
+                <p class="presenter-name">Quizmaster Klaas presenteert</p>
+                <h1 class="show-title">
+                    <span id="showName">Loading...</span>
+                </h1>
+                <p class="subtitle">De teams van vandaag zijn:</p>
+            </div>
+
+            <!-- QR Code -->
+            <div class="qr-code-container">
+                <img src="https://api.qrserver.com/v1/create-qr-code/?size=400x400&data=https://www.pinkmilk.eu/phone/"
+                    alt="Team Registration QR Code" class="qr-code">
+            </div>
+        </div>
+
+        <!-- Teams Display Container -->
+        <div id="teamsContainer" class="teams-container">
+            <!-- Teams will be dynamically added here -->
+        </div>
+
+        <!-- Status indicator -->
+        <div class="status-indicator">
+            <span class="status-dot"></span>
+            <span class="status-text">Live</span>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://unpkg.com/pocketbase@0.21.1/dist/pocketbase.umd.js"></script>
+    <script src="config.js"></script>
+    <script src="script-new.js"></script>
+</body>
+
+</html>

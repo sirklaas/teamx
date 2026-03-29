@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="nl">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TeamX Input</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Barlow+Semi+Condensed:wght@400&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+    <div class="container">
+        <div class="teamx-blocks-container" id="blocksContainer">
+
+            <!-- Blank Form - Always First -->
+            <div class="teamx-block blank-form" data-priority="-1">
+                <h3>Nieuwe</h3>
+                <form class="game-form" data-record-id="new">
+                    <div class="form-field">
+                        <label>Show Naam</label>
+                        <input type="text" name="game_name" required>
+                    </div>
+
+                    <div class="form-row form-row-top">
+                        <div class="form-field">
+                            <label class="weekday-label" data-weekday-for="datum">Datum</label>
+                            <input type="date" name="datum">
+                            <div class="date-display-small" data-date-display-for="datum"></div>
+                        </div>
+                        <div class="form-field">
+                            <label>Start</label>
+                            <input type="time" name="start_time" value="18:00">
+                        </div>
+                        <div class="form-field">
+                            <label>Buro</label>
+                            <select name="buro" data-buro-select>
+                                <option value="">-</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="divider"></div>
+
+                    <div class="form-row">
+                        <div class="form-field">
+                            <label>Hoeveel Teams</label>
+                            <input type="number" name="hoeveel_teams" min="0" max="99">
+                        </div>
+                        <div class="form-field">
+                            <label>Players</label>
+                            <input type="number" name="players" min="0" max="999">
+                        </div>
+                    </div>
+
+                    <div class="form-field">
+                        <label>TV Screen</label>
+                        <div class="radio-box">
+                            <div class="radio-inline">
+                                <label><input type="radio" name="tv_screen" value="Beamer"> Beamer</label>
+                                <label><input type="radio" name="tv_screen" value="TV"> TV</label>
+                                <label><input type="radio" name="tv_screen" value="None" checked> None</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-field">
+                        <label>Audio input</label>
+                        <div class="radio-box">
+                            <div class="radio-inline">
+                                <label><input type="radio" name="audio_input" value="XLR"> XLR</label>
+                                <label><input type="radio" name="audio_input" value="Tulp"> Tulp</label>
+                                <label><input type="radio" name="audio_input" value="Aux"> Aux</label>
+                                <label><input type="radio" name="audio_input" value="None" checked> None</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-field">
+                        <label>Parking</label>
+                        <input type="text" name="parking" placeholder="Betaald adres? | Laden lossen mogelijk?">
+                    </div>
+
+                    <div class="form-field">
+                        <label>Priority</label>
+                        <input type="number" name="priority" min="0" max="99" value="1">
+                    </div>
+
+                    <div class="form-field">
+                        <label>PhotoCircle</label>
+                        <input type="text" name="photo_circle">
+                    </div>
+
+                    <div class="form-field">
+                        <label>Extra</label>
+                        <div class="radio-box">
+                            <div class="radio-inline">
+                                <label><input type="checkbox" name="telefoons" value="1"> Telefoons</label>
+                                <label><input type="checkbox" name="spa_rood" value="1"> Spa Rood</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-field notities-field">
+                        <label>Notities</label>
+                        <textarea name="notities" rows="6"
+                            placeholder="Gesproken met&#10;Speciale afspraken&#10;spa rood?"></textarea>
+                    </div>
+
+                    <button type="submit" class="btn-save">Create Team</button>
+                    <p class="priority-note">Let op: Priority 1 takes the lead!</p>
+                </form>
+            </div>
+
+            <!-- Dynamic blocks will be loaded from PocketBase here -->
+
+        </div>
+    </div>
+
+    <!-- Configuration -->
+    <script src="config.js"></script>
+
+    <!-- Main Script -->
+    <script src="js/script.js?v=2.5.0"></script>
+</body>
+
+</html>

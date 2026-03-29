@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TeamX - Registratie</title>
+    <!-- Force open in real browser on some devices -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <link href="https://fonts.googleapis.com/css2?family=Barlow+Semi+Condensed:wght@400&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style-new.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Audio files for effects -->
+        <audio id="enterSound" preload="auto">
+            <source src="succes.mp3" type="audio/mpeg">
+        </audio>
+        <audio id="teamRevealSound" preload="auto">
+            <source src="stardust.mp3" type="audio/mpeg">
+        </audio>
+        <audio id="whooshSound" preload="auto">
+            <source src="whoosh.mp3" type="audio/mpeg">
+        </audio>
+        
+        <!-- Show title -->
+        <p class="presenter-name">Quizmaster Klaas presenteert</p>
+        <h1 class="show-name">Even geduld...</h1>
+        <noscript><p style="color: red; text-align: center;">JavaScript is vereist. Open deze pagina in Safari of Chrome.</p></noscript>
+        
+        <!-- Name input section -->
+        <div class="input-group">
+            <input type="text" id="playerName" placeholder="Wat is je voornaam?" autocomplete="off">
+            <button class="enter-btn">
+                Enter
+                <div class="spinner"></div>
+            </button>
+        </div>
+
+        <!-- Player info display (hidden initially) -->
+        <div class="player-info">
+            <p><span class="player-name"></span> jij bent speler nummer <span class="player-number">000</span> van <span class="total-players">0</span></p>
+            <p>en je zit in team</p>
+        </div>
+
+        <!-- Team number circle (hidden initially) -->
+        <div class="number-circle"></div>
+
+        <!-- Confirm button (hidden initially) -->
+        <button class="confirm-button">
+            <span class="button-text">Klik Hier<br>Als je jouw team gevonden hebt<br>en download the app!</span>
+            <span class="button-icon">→</span>
+        </button>
+    </div>
+
+    <!-- Name duplication modal -->
+    <div class="modal" id="nameModal">
+        <div class="modal-content">
+            <h2>Deze naam staat al<br>in het systeem!</h2>
+            <div class="modal-buttons">
+                <button id="existingPlayer" class="modal-btn">JA, dat klopt - dat ging per ongeluk <span class="existing-name"></span></button>
+                <div class="duplicate-name-section">
+                    <button id="newPlayer" class="modal-btn">Wij hebben meerdere mensen met deze naam</button>
+                    <div class="suffix-input">
+                        <span>Noem mij maar</span>
+                        <span class="existing-name"></span>
+                        <input type="text" id="nameSuffix" maxlength="2" pattern="[a-zA-Z]{1,2}">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script>
+        // Show error if scripts fail to load
+        window.onerror = function(msg, url, line) {
+            document.querySelector('.show-name').textContent = 'Fout: Open in Safari/Chrome';
+            console.error('Error:', msg, url, line);
+        };
+    </script>
+    <script src="https://unpkg.com/pocketbase@0.21.1/dist/pocketbase.umd.js" onerror="document.querySelector('.show-name').textContent='Laad fout - open in echte browser'"></script>
+    <script src="config.js"></script>
+    <script src="script-new.js"></script>
+</body>
+</html>
