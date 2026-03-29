@@ -130,36 +130,53 @@ class TeamXDisplay {
     calculateDynamicSizing() {
         if (!this.gameRecord) return;
 
-        const containerHeight = this.elements.teamsContainer.offsetHeight;
-        const headerHeight = document.querySelector('.header').offsetHeight;
-        const availableHeight = containerHeight; // teams-container is flex:1
-
-        // Guess max players per team (use actual if possible, otherwise assume 10)
+        // Get container and available space
+        const container = this.elements.teamsContainer;
+        const containerHeight = container.offsetHeight;
+        
+        // Account for container padding (5vh bottom padding = approx 50px)
+        const vhToPx = window.innerHeight / 100;
+        const verticalPadding = 2 * vhToPx + 5 * vhToPx; // top + bottom padding
+        
+        // Find max players to determine how many slots must fit
         let maxPlayers = 0;
         for (let i = 1; i <= this.gameRecord.teamnumber; i++) {
             maxPlayers = Math.max(maxPlayers, (this.playersByTeam[i] || []).length);
         }
         
-        // Ensure at least 6 slots of space for growth
-        const slotsToFit = Math.max(maxPlayers + 1, 8);
+        // We want to fit at least 'maxPlayers' + room for 2 more for growth
+        // But also maintain a minimum density of 8 slots for small games
+        const slotsToFit = Math.max(maxPlayers + 2, 8);
         
-        // Calculate size (circles are ~10vh)
-        const teamCircleHeight = window.innerHeight * 0.1;
-        const spacing = window.innerHeight * 0.05;
-        const availableForSlots = availableHeight - teamCircleHeight - spacing;
+        // Circle height is min(9.6vh, ...)
+        const circleHeight = Math.min(9.6 * vhToPx, (window.innerWidth * 0.75) / this.gameRecord.teamnumber);
+        const circleGap = 1.5 * vhToPx; // gap below circle
         
-        const slotHeight = Math.floor(availableForSlots / slotsToFit);
-        const fontSize = Math.max(1, Math.min(2.5, slotHeight / 25)) + 'rem';
-        const paddingV = Math.max(0.2, slotHeight / 100) + 'rem';
-        const gap = Math.max(0.1, slotHeight / 150) + 'rem';
+        // Calculate remaining space for slots
+        const availableForSlots = containerHeight - verticalPadding - circleHeight - circleGap;
+        
+        // Account for gaps between slots (n slots have n-1 gaps)
+        // Let h be slot height and g be gap. 
+        // We assume gap is approx 20% of slot height (based on 0.5rem vs 2.5rem font)
+        const gapRatio = 0.2; 
+        const totalGapFactor = (slotsToFit - 1) * gapRatio;
+        
+        const slotHeight = Math.floor(availableForSlots / (slotsToFit + totalGapFactor));
+        const finalGapHeight = Math.floor(slotHeight * gapRatio);
+
+        // Map to CSS variables
+        const fontSize = Math.max(0.7, Math.min(3, slotHeight / 25)) + 'rem';
+        const paddingV = Math.max(2, slotHeight / 8) + 'px'; // pixels for precision
+        const borderRadius = Math.max(4, slotHeight / 4) + 'px';
 
         const root = document.documentElement;
         root.style.setProperty('--slot-font-size', fontSize);
         root.style.setProperty('--slot-padding-v', paddingV);
         root.style.setProperty('--slot-min-height', slotHeight + 'px');
-        root.style.setProperty('--slot-gap', gap);
+        root.style.setProperty('--slot-gap', finalGapHeight + 'px');
+        root.style.setProperty('--slot-radius', borderRadius);
         
-        console.log(`Dynamic Sizing: Fit ${slotsToFit} slots in ${availableForSlots}px -> ${slotHeight}px slot`);
+        console.log(`Sizing: ${slotsToFit} slots in ${availableForSlots}px -> h:${slotHeight}px, g:${finalGapHeight}px (${maxPlayers} current max)`);
     }
 
     createAnnouncementOverlay() {

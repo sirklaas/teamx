@@ -152,15 +152,13 @@ body {
     align-items: flex-start;
     gap: 3rem;
     margin: 0 auto;
-    padding: 2vh 2rem 5vh 2rem;
+    padding: 5vh 2rem 5vh 2rem; /* 5vh top room for circles, 5vh bottom for margin */
     flex: 1;
     flex-wrap: nowrap;
     width: 100%;
     gap: 2rem;
     box-sizing: border-box;
-    overflow-y: auto;
-    overflow-x: hidden;
-    box-sizing: border-box;
+    overflow: hidden; /* Prevent scrolling, force dynamic sizing to fit */
 }
 
 .teams-container::-webkit-scrollbar {
@@ -180,7 +178,8 @@ body {
     max-width: 450px;
     height: 100%;
     position: relative;
-    min-width: 0; /* Allow columns to shrink if needed */
+    min-width: 0;
+    overflow: visible; /* Allow circles to breathe if needed */
 }
 
 .team-column:nth-child(1) {
