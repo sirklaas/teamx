@@ -209,29 +209,35 @@ body {
     font-size: 1.8rem;
     font-weight: 500;
     cursor: pointer;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
     gap: 0.8rem;
-    box-shadow: 0 0 15px rgba(217, 0, 36, 0.4), 0 0 5px #fff;
+    box-shadow: 0 0 20px rgba(217, 0, 36, 0.6), 0 0 10px rgba(255, 255, 255, 0.8);
     text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
     border: 3px solid #fff;
     min-width: 280px;
     max-width: 85%;
     z-index: 1000;
     opacity: 1;
-    animation: electricGlow 1.5s infinite alternate;
+    animation: electricGlow 0.8s ease-in-out infinite alternate;
 }
 
 @keyframes electricGlow {
-    0% {
-        box-shadow: 0 0 10px #fff, 0 0 20px #fff, 0 0 30px #DC143C, 0 0 40px #DC143C;
-        border-color: #fff;
+    0%, 100% {
+        box-shadow: 0 0 5px #fff, 0 0 10px #fff, 0 0 20px #DC143C, 0 0 30px #DC143C;
+        transform: translateX(-50%) translateY(140px) scale(1);
+        opacity: 1;
     }
-    100% {
-        box-shadow: 0 0 5px #fff, 0 0 10px #fff, 0 0 15px #DC143C, 0 0 20px #DC143C;
-        border-color: #f0f0f0;
+    50% {
+        box-shadow: 0 0 15px #fff, 0 0 25px #fff, 0 0 50px #DC143C, 0 0 70px #DC143C;
+        transform: translateX(-50%) translateY(140px) scale(1.03);
+        opacity: 0.95;
+    }
+    25%, 75% {
+        box-shadow: 0 0 12px #fff, 0 0 22px #DC143C, 0 0 45px #DC143C;
+        opacity: 1;
     }
 }
 
@@ -244,38 +250,39 @@ body {
         transform: translateX(-50%) translateY(-200%);
     }
     100% {
-        transform: translateX(-50%) translateY(120px);
+        transform: translateX(-50%) translateY(140px);
     }
 }
 
 .confirm-button.show:hover {
-    transform: translateX(-50%) translateY(120px) scale(1.05);
-    box-shadow: 0 12px 35px rgba(217, 0, 36, 0.5);
-    background: linear-gradient(135deg, #ff0030 0%, #a00000 100%);
+    transform: translateX(-50%) translateY(140px) scale(1.05);
 }
 
 .pill-btn {
-    background: #fff;
-    color: #d90024;
-    padding: 0.6rem 2.5rem;
-    border-radius: 50px;
-    font-weight: 800;
-    font-size: 1.5rem;
-    margin-bottom: 0.5rem;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.3);
-    text-transform: uppercase;
-    letter-spacing: 1px;
+    background: #fff !important;
+    color: #d90024 !important;
+    padding: 0.6rem 2.5rem !important;
+    border-radius: 50px !important;
+    font-weight: 900 !important;
+    font-size: 1.5rem !important;
+    margin-bottom: 0.5rem !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.3) !important;
+    text-transform: uppercase !important;
+    letter-spacing: 2px !important;
+    width: auto !important;
 }
 
 .button-text {
-    line-height: 1.2;
-    font-size: 1.2rem;
+    line-height: 1.3;
+    font-size: 1.3rem;
     text-align: center;
     color: rgba(255, 255, 255, 0.95);
     font-weight: 500;
+    width: 100%;
+    display: block;
 }
 
 .button-icon {
