@@ -152,11 +152,12 @@ body {
     align-items: flex-start;
     gap: 3rem;
     margin: 0 auto;
-    padding: 2vh 0.5rem 5vh 0.5rem;
+    padding: 2vh 2rem 5vh 2rem;
     flex: 1;
     flex-wrap: nowrap;
     width: 100%;
-    gap: 1.5rem;
+    gap: 2rem;
+    box-sizing: border-box;
     overflow-y: auto;
     overflow-x: hidden;
     box-sizing: border-box;
@@ -175,9 +176,11 @@ body {
     animation: slideUp 0.5s ease forwards;
     opacity: 0;
     gap: 1.5vh;
-    width: calc(100% / var(--team-count, 4));
+    flex: 1;
+    max-width: 450px;
     height: 100%;
     position: relative;
+    min-width: 0; /* Allow columns to shrink if needed */
 }
 
 .team-column:nth-child(1) {
