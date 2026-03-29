@@ -236,16 +236,16 @@ body {
 @keyframes electricGlow {
     0%, 100% {
         box-shadow: 0 0 5px #fff, 0 0 10px #fff, 0 0 20px #DC143C, 0 0 30px #DC143C;
-        transform: translateX(-50%) translateY(160px) scale(1);
+        transform: translateX(-50%) translateY(280px) scale(1);
     }
     50% {
         box-shadow: 0 0 15px #fff, 0 0 25px #fff, 0 0 50px #DC143C, 0 0 70px #DC143C;
-        transform: translateX(-50%) translateY(160px) scale(1.02);
+        transform: translateX(-50%) translateY(280px) scale(1.02);
         opacity: 0.95;
     }
     25%, 75% {
         box-shadow: 0 0 12px #fff, 0 0 22px #DC143C, 0 0 45px #DC143C;
-        transform: translateX(-50%) translateY(160px) scale(1.01);
+        transform: translateX(-50%) translateY(280px) scale(1.01);
         opacity: 1;
     }
 }
@@ -255,12 +255,12 @@ body {
         transform: translateX(-50%) translateY(-200%);
     }
     100% {
-        transform: translateX(-50%) translateY(160px);
+        transform: translateX(-50%) translateY(280px);
     }
 }
 
 .confirm-button.show:hover {
-    transform: translateX(-50%) translateY(160px) scale(1.05);
+    transform: translateX(-50%) translateY(280px) scale(1.05);
 }
 
 .pill-btn {
