@@ -118,9 +118,25 @@ class TeamXRegistration {
             this.totalTeams = this.gameRecord.teamnumber;
             this.totalPlayers = this.gameRecord.players;
 
+            // Auto-redirect if player has already registered for this show
+            const savedPlayer = localStorage.getItem('teamx_player');
+            if (savedPlayer) {
+                try {
+                    const parsed = JSON.parse(savedPlayer);
+                    if (parsed.showId === this.currentGameId) {
+                        console.log('Auto-redirecting registered player to media page:', parsed);
+                        window.location.href = `media.html?showId=${this.currentGameId}&playerName=${encodeURIComponent(parsed.name)}&team=${parsed.team}`;
+                        return;
+                    }
+                } catch (e) {
+                    console.error('Error parsing saved player:', e);
+                }
+            }
+
             // Update UI
             this.elements.showName.textContent = this.gameRecord.show || 'QuizMaster Klaas presenteert';
             this.elements.totalPlayersSpan.textContent = this.totalPlayers;
+
 
             console.log('Game loaded:', this.gameRecord.show);
             console.log('Show date:', this.gameRecord.datum);
@@ -327,10 +343,16 @@ class TeamXRegistration {
 
         // Setup confirm button
         this.elements.confirmButton.onclick = () => {
+            localStorage.setItem('teamx_player', JSON.stringify({
+                showId: this.currentGameId,
+                name: player.naam,
+                team: player.teamnr
+            }));
             const redirectUrl = `media.html?showId=${this.currentGameId}&playerName=${encodeURIComponent(player.naam)}&team=${player.teamnr}`;
             console.log('Navigating to:', redirectUrl);
             window.location.href = redirectUrl;
         };
+
     }
 
     addToPlayerQueue(name) {
@@ -495,10 +517,16 @@ class TeamXRegistration {
 
         // Setup confirm button
         this.elements.confirmButton.onclick = () => {
+            localStorage.setItem('teamx_player', JSON.stringify({
+                showId: this.currentGameId,
+                name: player.naam,
+                team: player.teamnr
+            }));
             const redirectUrl = `media.html?showId=${this.currentGameId}&playerName=${encodeURIComponent(player.naam)}&team=${player.teamnr}`;
             console.log('Navigating to:', redirectUrl);
             window.location.href = redirectUrl;
         };
+
     }
 
     animateTeamReveal() {
