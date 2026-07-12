@@ -87,7 +87,7 @@ class TeamXMedia {
     async loadExistingMedia() {
         try {
             // Get all files related to this show, sorted by created date descending
-            this.mediaList = await this.pb.collection('show_media').getFullList({
+            this.mediaList = await this.pb.collection('showmedia').getFullList({
                 filter: `show_id = "${this.showId}"`,
                 sort: '-created',
                 $autoCancel: false
@@ -102,7 +102,7 @@ class TeamXMedia {
 
     setupRealtimeSubscription() {
         try {
-            this.pb.collection('show_media').subscribe('*', (e) => {
+            this.pb.collection('showmedia').subscribe('*', (e) => {
                 if (e.record.show_id !== this.showId) return;
 
                 if (e.action === 'create') {
@@ -208,9 +208,9 @@ class TeamXMedia {
                 // Compress image before uploading
                 fileToUpload = await this.compressImage(file, 1600, 1600, 0.8);
             } else if (isVideo) {
-                // Limit video uploads to 25MB
-                if (file.size > 25 * 1024 * 1024) {
-                    throw new Error('Video is te groot. Selecteer een kortere video (maximaal 25MB).');
+                // Limit video uploads to 100MB (approx 1 minute of high-res video)
+                if (file.size > 100 * 1024 * 1024) {
+                    throw new Error('Video is te groot. Selecteer een kortere video (maximaal 1 minuut / 100MB).');
                 }
             }
 
@@ -226,7 +226,7 @@ class TeamXMedia {
             this.updateProgress(50, 'Uploaden naar album...');
 
             // Upload directly to PocketBase
-            await this.pb.collection('show_media').create(formData, {
+            await this.pb.collection('showmedia').create(formData, {
                 $autoCancel: false
             });
 
