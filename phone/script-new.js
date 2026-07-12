@@ -47,13 +47,28 @@ class TeamXRegistration {
     }
 
     async initialize() {
-        try {
-            await this.authenticatePocketBase();
-            await this.loadGameData();
-            this.setupRealtimeUpdates();
-        } catch (error) {
-            console.error('Initialization failed:', error);
-            this.elements.showName.textContent = 'Verbindingsfout - Vernieuw de pagina';
+        const maxRetries = 3;
+        const retryDelay = 1000; // Wait 1 second between retries
+
+        for (let attempt = 1; attempt <= maxRetries; attempt++) {
+            try {
+                if (attempt > 1) {
+                    console.log(`Retrying initialization (attempt ${attempt}/${maxRetries})...`);
+                }
+                await this.authenticatePocketBase();
+                await this.loadGameData();
+                this.setupRealtimeUpdates();
+                return; // Success! Exit the function
+            } catch (error) {
+                console.warn(`Initialization attempt ${attempt} failed:`, error);
+                if (attempt === maxRetries) {
+                    console.error('Max initialization retries reached. Showing connection error.');
+                    this.elements.showName.textContent = 'Verbindingsfout - Vernieuw de pagina';
+                } else {
+                    // Wait before the next attempt
+                    await new Promise(resolve => setTimeout(resolve, retryDelay));
+                }
+            }
         }
     }
 

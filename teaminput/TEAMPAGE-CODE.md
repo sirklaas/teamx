@@ -292,15 +292,28 @@ document.addEventListener('DOMContentLoaded', async function() {
      * @returns {Promise<boolean>} Success status
      */
     async function authenticatePocketBase() {
-        try {
-            console.log('Attempting to authenticate with PocketBase...');
-            const authData = await pb.collection("_superusers").authWithPassword("klaas@republick.nl", "biknu8-pyrnaB-mytvyx");
-            console.log('Authentication successful');
-            return true;
-        } catch (error) {
-            console.error('Authentication failed:', error);
-            document.getElementById('showName').textContent = 'Authentication Error';
-            return false;
+        const maxRetries = 3;
+        const retryDelay = 1000;
+
+        for (let attempt = 1; attempt <= maxRetries; attempt++) {
+            try {
+                if (attempt > 1) {
+                    console.log(`Retrying database connection (attempt ${attempt}/${maxRetries})...`);
+                }
+                console.log('Attempting to authenticate with PocketBase...');
+                const authData = await pb.collection("_superusers").authWithPassword("klaas@republick.nl", "biknu8-pyrnaB-mytvyx");
+                console.log('Authentication successful');
+                return true;
+            } catch (error) {
+                console.warn(`Connection attempt ${attempt} failed:`, error);
+                if (attempt === maxRetries) {
+                    console.error('Max connection retries reached.');
+                    document.getElementById('showName').textContent = 'Authentication Error';
+                    return false;
+                } else {
+                    await new Promise(resolve => setTimeout(resolve, retryDelay));
+                }
+            }
         }
     }
 

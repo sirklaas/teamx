@@ -34,22 +34,37 @@ class TeamXDisplay {
     }
 
     async initialize() {
-        try {
-            this.showLoading(true);
-            await this.authenticatePocketBase();
-            await this.loadGameData();
-            await this.loadAndDisplayTeams();
-            this.isFirstLoad = false;
-            this.setupRealtimeUpdates();
-            this.setupAutoRefresh();
-            this.setupResizeHandler();
-            this.setStatus('live');
-        } catch (error) {
-            console.error('Initialization failed:', error);
-            this.showError('Kan geen verbinding maken met de database');
-            this.setStatus('error');
-        } finally {
-            this.showLoading(false);
+        const maxRetries = 3;
+        const retryDelay = 1000; // Wait 1 second between retries
+
+        for (let attempt = 1; attempt <= maxRetries; attempt++) {
+            try {
+                this.showLoading(true);
+                if (attempt > 1) {
+                    console.log(`Retrying initialization (attempt ${attempt}/${maxRetries})...`);
+                }
+                await this.authenticatePocketBase();
+                await this.loadGameData();
+                await this.loadAndDisplayTeams();
+                this.isFirstLoad = false;
+                this.setupRealtimeUpdates();
+                this.setupAutoRefresh();
+                this.setupResizeHandler();
+                this.setStatus('live');
+                this.showLoading(false);
+                return; // Success! Exit the function
+            } catch (error) {
+                console.warn(`Initialization attempt ${attempt} failed:`, error);
+                if (attempt === maxRetries) {
+                    console.error('Max initialization retries reached. Showing connection error.');
+                    this.showError('Kan geen verbinding maken met de database');
+                    this.setStatus('error');
+                    this.showLoading(false);
+                } else {
+                    // Wait before the next attempt
+                    await new Promise(resolve => setTimeout(resolve, retryDelay));
+                }
+            }
         }
     }
 

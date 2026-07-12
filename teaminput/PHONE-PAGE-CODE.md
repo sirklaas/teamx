@@ -409,16 +409,30 @@ document.addEventListener('DOMContentLoaded', async function() {
      * @returns {Promise<boolean>} Success status
      */
     async function initializePocketBase() {
-        try {
-            console.log('Attempting to authenticate with PocketBase...');
-            const authData = await pb.collection("_superusers").authWithPassword("klaas@republick.nl", "biknu8-pyrnaB-mytvyx");
-            console.log('Successfully authenticated with PocketBase');
-            const success = await loadGameData();
-            return success;
-        } catch (error) {
-            console.error('Authentication error:', error);
-            alert('Kan geen verbinding maken met de database. Vernieuw de pagina.');
-            return false;
+        const maxRetries = 3;
+        const retryDelay = 1000;
+
+        for (let attempt = 1; attempt <= maxRetries; attempt++) {
+            try {
+                if (attempt > 1) {
+                    console.log(`Retrying database connection (attempt ${attempt}/${maxRetries})...`);
+                }
+                console.log('Attempting to authenticate with PocketBase...');
+                const authData = await pb.collection("_superusers").authWithPassword("klaas@republick.nl", "biknu8-pyrnaB-mytvyx");
+                console.log('Successfully authenticated with PocketBase');
+                const success = await loadGameData();
+                if (success) return true;
+                throw new Error('Failed to load initial game data');
+            } catch (error) {
+                console.warn(`Connection attempt ${attempt} failed:`, error);
+                if (attempt === maxRetries) {
+                    console.error('Max connection retries reached.');
+                    alert('Kan geen verbinding maken met de database. Vernieuw de pagina.');
+                    return false;
+                } else {
+                    await new Promise(resolve => setTimeout(resolve, retryDelay));
+                }
+            }
         }
     }
 

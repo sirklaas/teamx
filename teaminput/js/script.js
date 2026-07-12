@@ -128,14 +128,26 @@
 
             console.log('PocketBase initialized:', CONFIG.PB_URL);
 
-            // Authenticate with PocketBase
-            try {
-                await pb.collection("_superusers").authWithPassword("klaas@republick.nl", "biknu8-pyrnaB-mytvyx");
-                console.log('Successfully authenticated with PocketBase');
-            } catch (error) {
-                console.error('Authentication failed:', error);
-                showMessage('Authenticatie mislukt', 'error');
-                return;
+            // Authenticate with PocketBase with retries
+            const maxRetries = 3;
+            const retryDelay = 1000;
+            let authenticated = false;
+
+            for (let attempt = 1; attempt <= maxRetries; attempt++) {
+                try {
+                    await pb.collection("_superusers").authWithPassword("klaas@republick.nl", "biknu8-pyrnaB-mytvyx");
+                    console.log('Successfully authenticated with PocketBase');
+                    authenticated = true;
+                    break;
+                } catch (error) {
+                    console.warn(`Authentication attempt ${attempt} failed:`, error);
+                    if (attempt === maxRetries) {
+                        console.error('Authentication failed:', error);
+                        showMessage('Authenticatie mislukt', 'error');
+                        return;
+                    }
+                    await new Promise(resolve => setTimeout(resolve, retryDelay));
+                }
             }
 
             await loadBuroOptionsFromSchema();
