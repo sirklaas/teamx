@@ -9,7 +9,7 @@ This skill guides you through the architecture, development rules, and deploymen
 
 ## 🏗️ Architecture & Directories
 
-The project is a pure static HTML, CSS, and vanilla JS application with a PHP-friendly routing configuration for Vercel deployment, but it is primarily served via FTP on Hostinger.
+The project is a pure static HTML, CSS, and vanilla JS application with a PHP-friendly routing configuration for Vercel deployment, but it is primarily served via FTP on Hostslim.
 
 - **`phone/`**: The registration portal for mobile players.
 - **`teams/`**: The large-screen scoreboard display showing teams and players.
