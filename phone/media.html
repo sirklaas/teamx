@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TeamX - Deel Media</title>
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <link href="https://fonts.googleapis.com/css2?family=Barlow+Semi+Condensed:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="media-style.css?v=1.0">
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <h1 id="showName" class="show-name">Laden...</h1>
+            <p class="subtitle">Deel foto's & video's van deze show!</p>
+        </header>
+
+        <!-- Upload Section -->
+        <div class="upload-card">
+            <label for="mediaInput" class="upload-btn">
+                <span class="upload-icon">📸</span>
+                <span class="upload-text">Maak of kies een foto/video</span>
+            </label>
+            <input type="file" id="mediaInput" accept="image/*,video/*" style="display: none;">
+            
+            <!-- Progress indicator -->
+            <div id="uploadProgressContainer" class="progress-container" style="display: none;">
+                <p id="progressStatus" class="progress-status">Foto optimaliseren...</p>
+                <div class="progress-bar-bg">
+                    <div id="progressBar" class="progress-bar"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Gallery Section -->
+        <section class="gallery-section">
+            <h2>Live Show Album</h2>
+            <div id="galleryGrid" class="gallery-grid">
+                <!-- Media will be dynamically loaded here -->
+            </div>
+            <p id="noMediaMsg" class="no-media-msg" style="display: none;">Nog geen foto's geüpload. Wees de eerste!</p>
+        </section>
+    </div>
+
+    <!-- Lightbox Modal -->
+    <div id="lightbox" class="lightbox">
+        <span class="lightbox-close">&times;</span>
+        <div class="lightbox-content-container">
+            <img id="lightboxImg" class="lightbox-content" src="" alt="Full size photo" style="display: none;">
+            <video id="lightboxVideo" class="lightbox-content" controls style="display: none;"></video>
+        </div>
+        <div id="lightboxCaption" class="lightbox-caption"></div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://unpkg.com/pocketbase@0.22.0/dist/pocketbase.umd.js"></script>
+    <script src="config.js"></script>
+    <script src="media-script.js?v=1.0"></script>
+</body>
+</html>

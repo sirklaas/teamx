@@ -275,6 +275,13 @@ class TeamXRegistration {
 
         // Animate UI
         this.animateTeamReveal();
+
+        // Setup confirm button
+        this.elements.confirmButton.onclick = () => {
+            const redirectUrl = `media.html?showId=${this.currentGameId}&playerName=${encodeURIComponent(player.naam)}&team=${player.teamnr}`;
+            console.log('Navigating to:', redirectUrl);
+            window.location.href = redirectUrl;
+        };
     }
 
     addToPlayerQueue(name) {
@@ -437,16 +444,11 @@ class TeamXRegistration {
         // Animate UI
         this.animateTeamReveal();
 
-        // Setup confirm button with URL
-        const targetUrl = this.gameRecord?.url || 'https://www.pinkmilk.eu/photocircle/';
-        
-        if (!this.gameRecord?.url) {
-            console.warn('No URL set in game record, using default photocircle URL');
-        }
-        
+        // Setup confirm button
         this.elements.confirmButton.onclick = () => {
-            console.log('Navigating to:', targetUrl);
-            window.location.href = targetUrl;
+            const redirectUrl = `media.html?showId=${this.currentGameId}&playerName=${encodeURIComponent(player.naam)}&team=${player.teamnr}`;
+            console.log('Navigating to:', redirectUrl);
+            window.location.href = redirectUrl;
         };
     }
 
