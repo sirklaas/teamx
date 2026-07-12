@@ -5,12 +5,22 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>TeamX - Deel Media</title>
     <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-title" content="TeamX">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="apple-touch-icon" href="icon.jpg">
+    <link rel="manifest" href="manifest.json">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <link href="https://fonts.googleapis.com/css2?family=Barlow+Semi+Condensed:wght@400;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="media-style.css?v=1.0">
+    <link rel="stylesheet" href="media-style.css?v=1.1">
 </head>
 <body>
     <div class="container">
+        <!-- PWA Install Button -->
+        <button id="installAppBtn" class="install-app-btn" style="display: none;">
+            <span>Installeer App</span>
+            <span class="install-icon">📱</span>
+        </button>
+
         <!-- Header -->
         <header class="header">
             <h1 id="showName" class="show-name">Laden...</h1>
@@ -54,9 +64,33 @@
         <div id="lightboxCaption" class="lightbox-caption"></div>
     </div>
 
+    <!-- iOS Install Instructions Modal -->
+    <div id="iosInstallModal" class="ios-install-modal">
+        <div class="ios-install-content">
+            <h3>Voeg toe aan beginscherm</h3>
+            <p>Zo raak je de app nooit meer kwijt!</p>
+            <ol class="ios-steps">
+                <li>Tik op de <strong>Deel-knop</strong> <span class="share-icon-placeholder">📤</span> (vierkant met pijl omhoog) onderin of bovenin je browser.</li>
+                <li>Scrol omlaag en tik op <strong>Zet op beginscherm</strong> <span class="add-icon-placeholder">➕</span>.</li>
+            </ol>
+            <button class="modal-btn close-ios-btn">Begrepen</button>
+        </div>
+    </div>
+
     <!-- Scripts -->
+    <script>
+        // Register Service Worker
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('sw.js').catch(err => {
+                    console.log('SW registration failed:', err);
+                });
+            });
+        }
+    </script>
     <script src="https://unpkg.com/pocketbase@0.22.0/dist/pocketbase.umd.js"></script>
     <script src="config.js"></script>
-    <script src="media-script.js?v=1.0"></script>
+    <script src="media-script.js?v=1.1"></script>
 </body>
 </html>
+
