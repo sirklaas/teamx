@@ -38,7 +38,8 @@ class TeamXRegistration {
             // Modal elements
             nameModal: document.getElementById('nameModal'),
             existingPlayerBtn: document.getElementById('existingPlayer'),
-            newPlayerBtn: document.getElementById('newPlayer'),
+            confirmNewPlayerBtn: document.getElementById('confirmNewPlayer'),
+            previewNewNameSpan: document.getElementById('previewNewName'),
             nameSuffixInput: document.getElementById('nameSuffix'),
             existingNameSpans: document.querySelectorAll('.existing-name')
         };
@@ -166,6 +167,23 @@ class TeamXRegistration {
                 this.closeModal();
             }
         });
+
+        // Handle suffix input dynamically in duplicate name modal
+        this.elements.nameSuffixInput.addEventListener('input', () => {
+            let suffix = this.elements.nameSuffixInput.value.toUpperCase();
+            // Remove non-letter characters
+            suffix = suffix.replace(/[^A-Z]/g, '');
+            this.elements.nameSuffixInput.value = suffix;
+
+            const baseName = this.currentDuplicateName || '';
+            if (suffix && /^[A-Z]{1,2}$/.test(suffix)) {
+                this.elements.previewNewNameSpan.textContent = `${baseName} ${suffix}`;
+                this.elements.confirmNewPlayerBtn.disabled = false;
+            } else {
+                this.elements.previewNewNameSpan.textContent = `${baseName} ...`;
+                this.elements.confirmNewPlayerBtn.disabled = true;
+            }
+        });
     }
 
     async handleNameSubmission() {
@@ -215,7 +233,11 @@ class TeamXRegistration {
     }
 
     showNameModal(name, existingPlayer) {
+        this.currentDuplicateName = name;
         this.elements.existingNameSpans.forEach(span => span.textContent = name);
+        this.elements.nameSuffixInput.value = '';
+        this.elements.previewNewNameSpan.textContent = `${name} ...`;
+        this.elements.confirmNewPlayerBtn.disabled = true;
         this.elements.nameModal.classList.add('show');
 
         // Existing player button
@@ -224,15 +246,13 @@ class TeamXRegistration {
             this.showExistingTeam(existingPlayer);
         };
 
-        // New player with same name button
-        this.elements.newPlayerBtn.onclick = () => {
-            const suffix = this.elements.nameSuffixInput.value.trim();
-            if (suffix && /^[a-zA-Z]{1,2}$/.test(suffix)) {
+        // Confirm new player button
+        this.elements.confirmNewPlayerBtn.onclick = () => {
+            const suffix = this.elements.nameSuffixInput.value.trim().toUpperCase();
+            if (suffix && /^[A-Z]{1,2}$/.test(suffix)) {
                 this.closeModal();
                 this.addToPlayerQueue(`${name} ${suffix}`);
                 this.elements.nameSuffixInput.value = '';
-            } else {
-                alert('Voer 1 of 2 letters van je achternaam in');
             }
         };
     }

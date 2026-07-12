@@ -8,7 +8,7 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <link href="https://fonts.googleapis.com/css2?family=Barlow+Semi+Condensed:wght@400&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style-new.css?v=1.4">
+    <link rel="stylesheet" href="style-new.css?v=1.5">
 </head>
 <body>
     <div class="container">
@@ -60,12 +60,17 @@
             <div class="modal-buttons">
                 <button id="existingPlayer" class="modal-btn">JA, dat klopt - dat ging per ongeluk <span class="existing-name"></span></button>
                 <div class="duplicate-name-section">
-                    <button id="newPlayer" class="modal-btn">Wij hebben meerdere mensen met deze naam</button>
+                    <p class="duplicate-heading">Nee, ik ben een andere <span class="existing-name"></span></p>
                     <div class="suffix-input">
-                        <span>Noem mij maar</span>
-                        <span class="existing-name"></span>
-                        <input type="text" id="nameSuffix" maxlength="2" pattern="[a-zA-Z]{1,2}">
+                        <span>Noem mij maar:</span>
+                        <div class="suffix-row">
+                            <span class="existing-name"></span>
+                            <input type="text" id="nameSuffix" placeholder="XX" maxlength="2" pattern="[a-zA-Z]{1,2}">
+                        </div>
                     </div>
+                    <button id="confirmNewPlayer" class="modal-btn confirm-new-btn" disabled>
+                        Registreer als <span id="previewNewName">...</span>
+                    </button>
                 </div>
             </div>
         </div>
