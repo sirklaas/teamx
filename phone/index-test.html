@@ -27,6 +27,12 @@
             <source src="whoosh.mp3" type="audio/mpeg">
         </audio>
         
+        <!-- PWA Install Button -->
+        <button id="installAppBtn" class="install-app-btn" style="display: none;">
+            <span>Installeer App</span>
+            <span class="install-icon">📱</span>
+        </button>
+        
         <!-- Show title -->
         <p class="presenter-name">Quizmaster Klaas presenteert</p>
         <h1 class="show-name">Even geduld...</h1>
@@ -97,6 +103,19 @@
             });
         }
     </script>
+    <!-- iOS Install Instructions Modal -->
+    <div id="iosInstallModal" class="ios-install-modal">
+        <div class="ios-install-content">
+            <h3>Voeg toe aan beginscherm</h3>
+            <p>Zo raak je de app nooit meer kwijt!</p>
+            <ol class="ios-steps">
+                <li>Tik op de <strong>Deel-knop</strong> <span class="share-icon-placeholder">📤</span> (vierkant met pijl omhoog) onderin of bovenin je browser.</li>
+                <li>Scrol omlaag en tik op <strong>Zet op beginscherm</strong> <span class="add-icon-placeholder">➕</span>.</li>
+            </ol>
+            <button class="modal-btn close-ios-btn">Begrepen</button>
+        </div>
+    </div>
+
     <script src="https://unpkg.com/pocketbase@0.22.0/dist/pocketbase.umd.js" onerror="document.querySelector('.show-name').textContent='Laad fout - open in echte browser'"></script>
     <script src="config.js?v=2.5.1"></script>
     <script src="script-test.js?v=2.5.1"></script>

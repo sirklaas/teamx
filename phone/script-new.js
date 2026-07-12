@@ -184,7 +184,55 @@ class TeamXRegistration {
                 this.elements.confirmNewPlayerBtn.disabled = true;
             }
         });
+
+        // Setup PWA install promotion
+        const installBtn = document.getElementById('installAppBtn');
+        const iosModal = document.getElementById('iosInstallModal');
+        const closeIosBtn = document.querySelector('.close-ios-btn');
+        
+        let deferredPrompt;
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            if (installBtn) installBtn.style.display = 'inline-flex';
+        });
+
+        // Detect iOS
+        const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+        const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
+
+        if (isIOS && !isStandalone) {
+            if (installBtn) installBtn.style.display = 'inline-flex';
+        }
+
+        if (installBtn) {
+            installBtn.addEventListener('click', async () => {
+                if (deferredPrompt) {
+                    deferredPrompt.prompt();
+                    const { outcome } = await deferredPrompt.userChoice;
+                    console.log(`User response to install: ${outcome}`);
+                    deferredPrompt = null;
+                    installBtn.style.display = 'none';
+                } else if (isIOS && iosModal) {
+                    iosModal.classList.add('show');
+                } else {
+                    alert('Om deze app te installeren, tik op de 3 puntjes (Chrome) of het deel-icoon (Safari) en kies "Toevoegen aan beginscherm".');
+                }
+            });
+        }
+
+        if (closeIosBtn && iosModal) {
+            closeIosBtn.addEventListener('click', () => {
+                iosModal.classList.remove('show');
+            });
+            iosModal.addEventListener('click', (e) => {
+                if (e.target === iosModal) {
+                    iosModal.classList.remove('show');
+                }
+            });
+        }
     }
+
 
     async handleNameSubmission() {
         const name = this.elements.playerNameInput.value.trim();
