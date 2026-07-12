@@ -6,6 +6,10 @@
     <title>TeamX - Registratie</title>
     <!-- Force open in real browser on some devices -->
     <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-title" content="TeamX">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="apple-touch-icon" href="icon.jpg">
+    <link rel="manifest" href="manifest.json">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <link href="https://fonts.googleapis.com/css2?family=Barlow+Semi+Condensed:wght@400&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style-new.css?v=1.5">
@@ -83,6 +87,15 @@
             document.querySelector('.show-name').textContent = 'Fout: Open in Safari/Chrome';
             console.error('Error:', msg, url, line);
         };
+
+        // Register Service Worker
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('sw.js').catch(err => {
+                    console.log('SW registration failed:', err);
+                });
+            });
+        }
     </script>
     <script src="https://unpkg.com/pocketbase@0.22.0/dist/pocketbase.umd.js" onerror="document.querySelector('.show-name').textContent='Laad fout - open in echte browser'"></script>
     <script src="config.js?v=2.5.1"></script>
