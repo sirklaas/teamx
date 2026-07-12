@@ -13,6 +13,7 @@ class TeamXDisplay {
         this.isFirstLoad = true;
         this.isAnnouncing = false;
         this.announcementQueue = [];
+        this.queuedPlayerNumbers = new Set();
 
         this.initializeElements();
         this.initialize();
@@ -344,14 +345,22 @@ class TeamXDisplay {
 
         // Add or update players
         teamPlayers.forEach((player, index) => {
+            const playerNumStr = String(player.playernr);
             let slot = playersContainer.querySelector(`[data-player-number="${player.playernr}"]`);
 
             if (!slot) {
+                // Skip if this player number is already in the announcement queue
+                if (this.queuedPlayerNumbers.has(playerNumStr)) {
+                    console.log(`Player ${player.naam} (${player.playernr}) is already in announcement queue, skipping duplicate creation.`);
+                    return;
+                }
+
                 slot = this.createPlayerSlot(player);
                 
                 // If not first load, trigger animation
                 if (!this.isFirstLoad) {
                     slot.style.opacity = '0'; // Hide initially
+                    this.queuedPlayerNumbers.add(playerNumStr);
                     this.queueAnnouncement(player, slot, playersContainer, index);
                 } else {
                     // Normal insertion for first load
@@ -409,6 +418,9 @@ class TeamXDisplay {
                 } else {
                     container.appendChild(finalSlot);
                 }
+
+                // Remove from queued list now that the slot is in the DOM
+                this.queuedPlayerNumbers.delete(String(player.playernr));
 
                 const targetRect = finalSlot.getBoundingClientRect();
                 const startRect = this.elements.announcementName.getBoundingClientRect();
