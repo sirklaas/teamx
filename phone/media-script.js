@@ -138,21 +138,8 @@ class TeamXMedia {
             }
         });
 
-        // Logout / register again button
-        const logoutBtn = document.getElementById('logoutBtn');
-        if (logoutBtn) {
-            logoutBtn.addEventListener('click', (e) => {
-                e.preventDefault();
-                localStorage.removeItem('teamx_player');
-                // Determine redirect target based on referrer or URL
-                let target = 'index.html';
-                if (window.location.pathname.includes('-test') || document.referrer.includes('-test')) {
-                    target = 'index-test.html';
-                }
-                window.location.href = `${target}?showId=${this.showId}`;
-            });
-        }
     }
+
 
 
     renderGallery() {
