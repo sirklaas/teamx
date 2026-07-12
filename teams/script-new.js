@@ -14,6 +14,9 @@ class TeamXDisplay {
         this.isAnnouncing = false;
         this.announcementQueue = [];
         this.queuedPlayerNumbers = new Set();
+        this.photosList = [];
+        this.currentPhotoIndex = 0;
+        this.photoRotationInterval = null;
 
         this.initializeElements();
         this.initialize();
@@ -47,6 +50,7 @@ class TeamXDisplay {
                 await this.authenticatePocketBase();
                 await this.loadGameData();
                 await this.loadAndDisplayTeams();
+                await this.loadLatestPhotos();
                 this.isFirstLoad = false;
                 this.setupRealtimeUpdates();
                 this.setupAutoRefresh();
@@ -391,6 +395,13 @@ class TeamXDisplay {
         if (this.isAnnouncing || this.announcementQueue.length === 0) return;
 
         this.isAnnouncing = true;
+
+        // Hide photos when busy announcing
+        const photosBox = document.getElementById('latestPhotosContainer');
+        if (photosBox) {
+            photosBox.classList.add('hidden');
+        }
+
         const { player, finalSlot, container, index } = this.announcementQueue.shift();
 
         await this.announceAndFlyPlayer(player, finalSlot, container, index);
@@ -398,6 +409,11 @@ class TeamXDisplay {
         this.isAnnouncing = false;
         if (this.announcementQueue.length > 0) {
             setTimeout(() => this.processAnnouncementQueue(), 500);
+        } else {
+            // Show photos back when not busy anymore
+            if (photosBox) {
+                photosBox.classList.remove('hidden');
+            }
         }
     }
 
@@ -500,6 +516,22 @@ class TeamXDisplay {
                         await this.loadAndDisplayTeams();
                         this.flashStatus();
                     }, 2000);
+                }
+            });
+
+            // Subscribe to new media uploads
+            this.pb.collection('showmedia').subscribe('*', (e) => {
+                if (e.record.show_id !== this.currentGameId) return;
+                
+                if (e.action === 'create') {
+                    console.log('Realtime new photo received:', e.record);
+                    this.photosList.unshift(e.record);
+                    if (this.photosList.length > 10) {
+                        this.photosList.pop();
+                    }
+                    this.currentPhotoIndex = 0;
+                    this.updatePhotosDisplay();
+                    this.startPhotoRotation();
                 }
             });
 
@@ -622,7 +654,88 @@ class TeamXDisplay {
         if (this.autoRefreshInterval) {
             clearInterval(this.autoRefreshInterval);
         }
+        if (this.photoRotationInterval) {
+            clearInterval(this.photoRotationInterval);
+        }
         this.pb.collection(CONFIG.COLLECTION_TEAMS).unsubscribe();
+        this.pb.collection('showmedia').unsubscribe();
+    }
+
+    // PWA Latest Photos Helpers
+    async loadLatestPhotos() {
+        try {
+            console.log('Loading latest photos for show:', this.currentGameId);
+            const records = await this.pb.collection('showmedia').getList(1, 10, {
+                filter: `show_id = "${this.currentGameId}"`,
+                sort: '-created',
+                $autoCancel: false
+            });
+
+            this.photosList = records.items || [];
+            console.log('Loaded photos:', this.photosList.length);
+            
+            this.updatePhotosDisplay();
+            this.startPhotoRotation();
+        } catch (error) {
+            console.error('Error loading latest photos:', error);
+        }
+    }
+
+    startPhotoRotation() {
+        if (this.photoRotationInterval) {
+            clearInterval(this.photoRotationInterval);
+        }
+        
+        this.currentPhotoIndex = 0;
+        if (this.photosList.length <= 1) return;
+
+        this.photoRotationInterval = setInterval(() => {
+            if (this.photosList.length <= 1) return;
+            this.currentPhotoIndex = (this.currentPhotoIndex + 1) % this.photosList.length;
+            this.updatePhotosDisplay();
+        }, 5000); // Rotate every 5 seconds
+    }
+
+    updatePhotosDisplay() {
+        const photosBox = document.getElementById('latestPhotosContainer');
+        const photoImg = document.getElementById('latestPhotoImg');
+        const photoCaption = document.getElementById('latestPhotoCaption');
+        
+        if (!photosBox || this.photosList.length === 0) {
+            if (photosBox) photosBox.style.display = 'none';
+            return;
+        }
+
+        // Show photos if not busy announcing
+        if (!this.isAnnouncing) {
+            photosBox.style.display = 'flex';
+            photosBox.classList.remove('hidden');
+        }
+
+        const record = this.photosList[this.currentPhotoIndex];
+        const photoUrl = this.getPhotoUrl(record);
+
+        if (photoImg) {
+            // Smooth fade transition
+            photoImg.style.opacity = '0';
+            setTimeout(() => {
+                photoImg.src = photoUrl;
+                photoImg.onload = () => {
+                    photoImg.style.opacity = '1';
+                };
+            }, 300);
+        }
+
+        if (photoCaption) {
+            const teamLabel = record.team_number ? ` (Team ${record.team_number})` : '';
+            photoCaption.textContent = `${record.player_name || 'Speler'}${teamLabel}`;
+        }
+    }
+
+    getPhotoUrl(record) {
+        if (!record || !record.file) return '';
+        if (record.file.startsWith('http')) return record.file;
+        return `${CONFIG.PB_URL}/api/files/${record.collectionId || record.collectionName || 'showmedia'}/${record.id}/${record.file}`;
     }
 }
 

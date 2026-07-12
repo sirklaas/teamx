@@ -553,3 +553,64 @@ body {
         transform: rotate(360deg);
     }
 }
+
+/* Latest Photos Container Style (Top Right) */
+.latest-photos-container {
+    position: fixed;
+    top: 2.88vh;
+    right: 2.88vh;
+    width: 320px;
+    height: 220px;
+    background: rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(15px);
+    padding: 8px;
+    border-radius: 20px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.25);
+    border: 2px solid rgba(255, 255, 255, 0.15);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    z-index: 100;
+    transition: opacity 0.5s ease, transform 0.5s ease;
+}
+
+.latest-photos-container.hidden {
+    opacity: 0;
+    transform: scale(0.9) translateY(-20px);
+    pointer-events: none;
+}
+
+.photo-frame {
+    width: 100%;
+    height: 100%;
+    position: relative;
+    border-radius: 12px;
+    overflow: hidden;
+    background: rgba(0, 0, 0, 0.2);
+}
+
+.photo-frame img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: opacity 0.3s ease;
+}
+
+.photo-caption {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.8) 0%, rgba(0, 0, 0, 0) 100%);
+    padding: 10px;
+    color: white;
+    font-size: 1.1rem;
+    font-weight: 600;
+    font-family: 'Barlow Semi Condensed', sans-serif;
+    text-align: center;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+}
