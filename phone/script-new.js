@@ -201,7 +201,8 @@ class TeamXRegistration {
         const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
         const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
 
-        if (isIOS && !isStandalone) {
+        // Show button on load for all devices if not running in standalone (installed) mode
+        if (!isStandalone) {
             if (installBtn) installBtn.style.display = 'inline-flex';
         }
 
