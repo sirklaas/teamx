@@ -22,8 +22,8 @@ The project is a pure static HTML, CSS, and vanilla JS application with a PHP-fr
 
 We use **PocketBase** as our backend database (specifically `https://pinkmilk.pockethost.io`).
 
-### Critical Compatibility Rules (v0.23.0+)
-The PocketBase server was upgraded to **v0.23.0+**. Consequently:
+### Critical Compatibility Rules (version 0.39)
+The PocketBase server runs on **version 0.39** (which uses v0.23.0+ rules). Consequently:
 1. **SDK Version**: Always load PocketBase JS SDK **v0.22.0** or newer in client scripts:
    ```html
    <script src="https://unpkg.com/pocketbase@0.22.0/dist/pocketbase.umd.js"></script>
