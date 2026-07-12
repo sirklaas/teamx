@@ -59,7 +59,7 @@ class TeamXRegistration {
     async authenticatePocketBase() {
         try {
             console.log('Authenticating with PocketBase...');
-            await this.pb.admins.authWithPassword(CONFIG.ADMIN_EMAIL, CONFIG.ADMIN_PASSWORD);
+            await this.pb.collection("_superusers").authWithPassword(CONFIG.ADMIN_EMAIL, CONFIG.ADMIN_PASSWORD);
             console.log('Authentication successful');
         } catch (error) {
             console.error('Authentication failed:', error);

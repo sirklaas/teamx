@@ -34,7 +34,7 @@ Complete code for the large screen team display page that shows all teams and pl
         
         <div class="team-summaries-container" id="teamSummariesContainer"></div>
     </div>
-    <script src="https://unpkg.com/pocketbase@0.21.1/dist/pocketbase.umd.js"></script>
+    <script src="https://unpkg.com/pocketbase@0.22.0/dist/pocketbase.umd.js"></script>
     <script src="script.js"></script>
     <script>
         function toggleFullScreen() {
@@ -294,7 +294,7 @@ document.addEventListener('DOMContentLoaded', async function() {
     async function authenticatePocketBase() {
         try {
             console.log('Attempting to authenticate with PocketBase...');
-            const authData = await pb.admins.authWithPassword("klaas@republick.nl", "biknu8-pyrnaB-mytvyx");
+            const authData = await pb.collection("_superusers").authWithPassword("klaas@republick.nl", "biknu8-pyrnaB-mytvyx");
             console.log('Authentication successful');
             return true;
         } catch (error) {

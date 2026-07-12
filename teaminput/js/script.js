@@ -121,7 +121,7 @@
     async function initPocketBase() {
         // Load PocketBase SDK
         const script = document.createElement('script');
-        script.src = 'https://unpkg.com/pocketbase@0.21.1/dist/pocketbase.umd.js';
+        script.src = 'https://unpkg.com/pocketbase@0.22.0/dist/pocketbase.umd.js';
         script.onload = async function () {
             // Initialize PocketBase
             pb = new PocketBase(CONFIG.PB_URL);
@@ -130,7 +130,7 @@
 
             // Authenticate with PocketBase
             try {
-                await pb.admins.authWithPassword("klaas@republick.nl", "biknu8-pyrnaB-mytvyx");
+                await pb.collection("_superusers").authWithPassword("klaas@republick.nl", "biknu8-pyrnaB-mytvyx");
                 console.log('Successfully authenticated with PocketBase');
             } catch (error) {
                 console.error('Authentication failed:', error);

@@ -53,7 +53,7 @@ Complete code for the mobile player registration page.
     <span class="button-text">Klik hier <br>als je jouw team gevonden hebt!<br> en download the app!</span>
     <span class="button-icon">→</span>
 </button>
-<script src="https://unpkg.com/pocketbase@0.21.1/dist/pocketbase.umd.js"></script>
+<script src="https://unpkg.com/pocketbase@0.22.0/dist/pocketbase.umd.js"></script>
 ```
 
 ---
@@ -411,7 +411,7 @@ document.addEventListener('DOMContentLoaded', async function() {
     async function initializePocketBase() {
         try {
             console.log('Attempting to authenticate with PocketBase...');
-            const authData = await pb.admins.authWithPassword("klaas@republick.nl", "biknu8-pyrnaB-mytvyx");
+            const authData = await pb.collection("_superusers").authWithPassword("klaas@republick.nl", "biknu8-pyrnaB-mytvyx");
             console.log('Successfully authenticated with PocketBase');
             const success = await loadGameData();
             return success;
