@@ -6,8 +6,9 @@ Let a player who has already joined the active gameshow scan the same TeamX QR c
 
 ## Scope
 
-- Player entry page: `phone/index.html` and its JavaScript.
-- Photo page: `phone/media.html` remains the destination.
+- Production player page: the `phone/` folder, served at `https://www.pinkmilk.eu/teamx/phone/`.
+- Test-only files, including `phone/index-test.html`, are not changed.
+- TeamX's PocketBase-backed `phone/media.html` is the destination; PhotoCircle links are not used.
 - One QR opens `https://www.pinkmilk.eu/teamx/phone/` for every show.
 - The remembered identity belongs to a gameshow, not to a team.
 
@@ -18,12 +19,12 @@ Let a player who has already joined the active gameshow scan the same TeamX QR c
 3. The browser stores the active show ID, player name, player number, and team number on that phone.
 4. On a later scan, TeamX loads the currently active show first.
 5. If the saved show ID matches the active show ID, TeamX skips name entry and shows `Hi <name>, welkom terug` with the team circle.
-6. The existing `Deel je foto's en video's` action opens `media.html` with the saved show ID, name, and team number.
+6. The `Deel je foto's en video's` action opens `media.html` with the saved show ID, name, and team number.
 7. If there is no saved identity, it is incomplete, or it belongs to a different show, TeamX removes it and displays the normal name-entry screen.
 
 ## Visual constraint
 
-Use Barlow Semi Condensed at weight 400 for headings and body copy. Do not introduce 700-weight headings.
+Use Barlow Semi Condensed at weight 400 for headings. Keep existing non-heading text styles unchanged and do not introduce 700-weight headings.
 
 ## Data and privacy
 
