@@ -31,6 +31,7 @@
         <!-- Show title -->
         <p class="presenter-name">Quizmaster Klaas presenteert</p>
         <h1 class="show-name">Even geduld...</h1>
+        <p class="returning-greeting" aria-live="polite"></p>
         <noscript><p style="color: red; text-align: center;">JavaScript is vereist. Open deze pagina in Safari of Chrome.</p></noscript>
         
         <!-- Name input section -->
@@ -53,8 +54,8 @@
 
         <!-- Confirm button (hidden initially) -->
         <button class="confirm-button">
-            <span class="pill-btn">Klik Hier</span>
-            <span class="button-text">Als je jouw team gevonden hebt<br>en download de app!</span>
+            <span class="pill-btn">Deel je foto's &amp; video's</span>
+            <span class="button-text">Open de foto's en video's van deze show</span>
         </button>
     </div>
 
@@ -101,6 +102,7 @@
 
     <script src="https://unpkg.com/pocketbase@0.22.0/dist/pocketbase.umd.js" onerror="document.querySelector('.show-name').textContent='Laad fout - open in echte browser'"></script>
     <script src="config.js?v=2.5.1"></script>
-    <script src="script-new.js?v=2.5.1"></script>
+    <script src="returning-player-session.js?v=1"></script>
+    <script src="script-new.js?v=2.5.2"></script>
 </body>
 </html>

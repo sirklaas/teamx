@@ -21,6 +21,7 @@ class TeamXRegistration {
         // UI Elements
         this.elements = {
             showName: document.querySelector('.show-name'),
+            returningGreeting: document.querySelector('.returning-greeting'),
             inputGroup: document.querySelector('.input-group'),
             playerNameInput: document.getElementById('playerName'),
             enterButton: document.querySelector('.enter-btn'),
@@ -58,6 +59,7 @@ class TeamXRegistration {
                 }
                 await this.authenticatePocketBase();
                 await this.loadGameData();
+                this.restoreReturningPlayer();
                 this.setupRealtimeUpdates();
                 return; // Success! Exit the function
             } catch (error) {
@@ -141,6 +143,25 @@ class TeamXRegistration {
         } catch (error) {
             console.error('Error setting up realtime updates:', error);
         }
+    }
+
+    restoreReturningPlayer() {
+        const returningPlayer = TeamXReturningPlayerSession.loadForShow(
+            window.localStorage,
+            this.currentGameId
+        );
+
+        if (!returningPlayer) {
+            return;
+        }
+
+        this.elements.returningGreeting.textContent = `Hi ${returningPlayer.playerName}, welkom terug`;
+        this.elements.returningGreeting.classList.add('show');
+        this.showTeamAssignment({
+            naam: returningPlayer.playerName,
+            playernr: returningPlayer.playerNumber,
+            teamnr: returningPlayer.teamNumber
+        });
     }
 
     setupEventListeners() {
@@ -269,15 +290,7 @@ class TeamXRegistration {
     }
 
     showExistingTeam(player) {
-        this.playSound('enter');
-
-        // Update player info
-        this.elements.playerNameSpan.textContent = player.naam;
-        this.elements.playerNumberSpan.textContent = player.playernr.toString().padStart(3, '0');
-        this.elements.numberCircle.textContent = player.teamnr;
-
-        // Animate UI
-        this.animateTeamReveal();
+        this.showTeamAssignment(player);
     }
 
     addToPlayerQueue(name) {
@@ -432,6 +445,13 @@ class TeamXRegistration {
     }
 
     showTeamAssignment(player) {
+        TeamXReturningPlayerSession.save(window.localStorage, {
+            showId: this.currentGameId,
+            playerName: player.naam,
+            playerNumber: player.playernr,
+            teamNumber: player.teamnr
+        });
+
         // Update player info
         this.elements.playerNameSpan.textContent = player.naam;
         this.elements.playerNumberSpan.textContent = player.playernr.toString().padStart(3, '0');
@@ -440,16 +460,13 @@ class TeamXRegistration {
         // Animate UI
         this.animateTeamReveal();
 
-        // Setup confirm button with URL
-        const targetUrl = this.gameRecord?.url || 'https://www.pinkmilk.eu/photocircle/';
-        
-        if (!this.gameRecord?.url) {
-            console.warn('No URL set in game record, using default photocircle URL');
-        }
-        
+        const mediaUrl = new URL('media.html', window.location.href);
+        mediaUrl.searchParams.set('showId', this.currentGameId);
+        mediaUrl.searchParams.set('playerName', player.naam);
+        mediaUrl.searchParams.set('team', player.teamnr);
+
         this.elements.confirmButton.onclick = () => {
-            console.log('Navigating to:', targetUrl);
-            window.location.href = targetUrl;
+            window.location.href = mediaUrl.toString();
         };
     }
 
