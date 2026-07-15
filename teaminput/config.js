@@ -5,7 +5,7 @@
 
 const CONFIG = {
     // Your PocketBase URL - update this!
-    PB_URL: 'https://pinkmilk.pockethost.io', // PocketHost URL
+    PB_URL: 'https://pb.pinkmilk.eu', // PocketHost URL
     
     // Collection name
     COLLECTION: 'teamx',

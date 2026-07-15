@@ -5,15 +5,11 @@
 
 const CONFIG = {
     // PocketBase configuration
-    PB_URL: 'https://pinkmilk.pockethost.io',
+    PB_URL: 'https://pb.pinkmilk.eu',
     
     // Collections
     COLLECTION_TEAMS: 'teamx',
     COLLECTION_PLAYERS: 'allplayers',
-    
-    // Admin credentials (for authentication)
-    ADMIN_EMAIL: 'klaas@republick.nl',
-    ADMIN_PASSWORD: 'biknu8-pyrnaB-mytvyx',
     
     // Priority for active show
     ACTIVE_PRIORITY: 5,

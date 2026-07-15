@@ -5,7 +5,7 @@
 
 const CONFIG = {
     // PocketBase configuration
-    PB_URL: 'https://pinkmilk.pockethost.io',
+    PB_URL: 'https://pb.pinkmilk.eu',
     
     // Collections
     COLLECTION_TEAMS: 'teamx',
@@ -27,7 +27,7 @@ const CONFIG = {
     
     // QR Code settings
     QR_CODE: {
-        url: 'https://www.pinkmilk.eu/phone/',
+        url: 'https://www.pinkmilk.eu/teamx/phone/?v=2.6.0',
         size: 400
     }
 };
