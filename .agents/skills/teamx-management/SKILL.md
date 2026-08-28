@@ -20,7 +20,7 @@ The project is a pure static HTML, CSS, and vanilla JS application with a PHP-fr
 
 ## 🗄️ PocketBase Integration
 
-We use **PocketBase** as our backend database (specifically `https://pinkmilk.pockethost.io`).
+We use **PocketBase** as our backend database (specifically `https://pb.pinkmilk.eu`).
 
 ### Critical Compatibility Rules (version 0.39)
 The PocketBase server runs on **version 0.39** (which uses v0.23.0+ rules). Consequently:

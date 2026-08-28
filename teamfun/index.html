@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#101010">
+    <title>TeamFun | Pink Milk</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Barlow+Semi+Condensed:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="teamfun.css">
+</head>
+<body>
+    <main class="page-shell">
+        <header class="show-header" aria-live="polite">
+            <p id="showDate" class="show-date">TeamFun</p>
+            <p class="presented-by">Quizmaster Klaas presenteerde</p>
+            <h1 id="showName">De foto's en video's laden…</h1>
+        </header>
+
+        <p id="statusMessage" class="status-message">Even geduld…</p>
+        <section id="mediaGrid" class="media-grid" aria-label="Foto's en video's van deze show"></section>
+
+        <section id="selectionToolbar" class="selection-toolbar" aria-label="Download foto's en video's">
+            <button id="selectButton" class="button button-secondary" type="button">Selecteer</button>
+            <button id="downloadButton" class="button button-primary" type="button" disabled>Download selectie</button>
+        </section>
+    </main>
+
+    <div id="lightbox" class="lightbox" hidden role="dialog" aria-modal="true" aria-label="Grote weergave">
+        <button id="lightboxClose" class="lightbox-close" type="button" aria-label="Sluiten">×</button>
+        <button id="lightboxPrevious" class="lightbox-nav lightbox-previous" type="button" aria-label="Vorige">‹</button>
+        <figure class="lightbox-figure">
+            <img id="lightboxImage" alt="" hidden>
+            <video id="lightboxVideo" controls playsinline hidden></video>
+            <figcaption id="lightboxCaption"></figcaption>
+        </figure>
+        <button id="lightboxNext" class="lightbox-nav lightbox-next" type="button" aria-label="Volgende">›</button>
+    </div>
+
+    <script src="https://unpkg.com/pocketbase@0.22.0/dist/pocketbase.umd.js"></script>
+    <script src="teamfun.js"></script>
+</body>
+</html>

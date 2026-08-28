@@ -31,7 +31,7 @@ body {
 
 .show-name {
     font-size: 2.2rem;
-    font-weight: 700;
+    font-weight: 400;
     text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
     margin-bottom: 0.3rem;
 }
@@ -93,7 +93,7 @@ body {
 
 .upload-text {
     font-size: 1.5rem;
-    font-weight: 700;
+    font-weight: 400;
     text-transform: uppercase;
     letter-spacing: 1px;
 }
@@ -140,7 +140,7 @@ body {
 
 .gallery-section h2 {
     font-size: 1.6rem;
-    font-weight: 700;
+    font-weight: 400;
     margin-bottom: 1.2rem;
     text-align: center;
     border-bottom: 2px dashed rgba(255, 255, 255, 0.2);
@@ -188,7 +188,7 @@ body {
     display: flex;
     align-items: center;
     gap: 3px;
-    font-weight: bold;
+    font-weight: 400;
 }
 
 .gallery-item .item-meta {
@@ -203,7 +203,7 @@ body {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    font-weight: bold;
+    font-weight: 400;
 }
 
 .no-media-msg {
@@ -242,7 +242,7 @@ body {
     right: 25px;
     color: #f1f1f1;
     font-size: 40px;
-    font-weight: bold;
+    font-weight: 400;
     cursor: pointer;
     transition: 0.3s;
     z-index: 10001;
@@ -284,6 +284,5 @@ body {
         grid-template-columns: repeat(2, 1fr);
     }
 }
-
 
 

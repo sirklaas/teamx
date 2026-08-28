@@ -88,32 +88,52 @@ class TeamXDisplay {
         try {
             console.log('Loading game data...');
 
-            // First try: Get shows with priority 1, sorted by date (earliest first)
-            let records = await this.pb.collection(CONFIG.COLLECTION_TEAMS).getFullList({
-                filter: 'priority = 1 && teamnumber > 0',
-                sort: 'datum',
-                $autoCancel: false
-            });
+            // Get showId from URL if present
+            const params = new URLSearchParams(window.location.search);
+            const urlShowId = params.get('showId');
+            
+            let records = [];
+            if (urlShowId) {
+                try {
+                    console.log('Fetching show matching URL showId:', urlShowId);
+                    const record = await this.pb.collection(CONFIG.COLLECTION_TEAMS).getOne(urlShowId, {
+                        $autoCancel: false
+                    });
+                    if (record) records = [record];
+                } catch (e) {
+                    console.warn('Failed to fetch show by URL ID:', e);
+                }
+            }
 
-            console.log('Priority 1 records found:', records.length);
-
-            // Fallback: If no priority 1 shows, try priority 2
+            // Active show lookup: Priority is strictly leading (1 first, then 2, 3...)
+            // with newest created (-created) as secondary sort for ties
             if (records.length === 0) {
-                console.log('No priority 1 shows, trying priority 2...');
                 records = await this.pb.collection(CONFIG.COLLECTION_TEAMS).getFullList({
-                    filter: 'priority = 2 && teamnumber > 0',
-                    sort: 'datum',
+                    filter: 'priority > 0',
+                    sort: 'priority,-created',
                     $autoCancel: false
                 });
-                console.log('Priority 2 records found:', records.length);
+                console.log('Active priority records found:', records.length);
+            }
+
+            // Fallback: Fetch most recently updated show in database if no priority > 0 exists
+            if (records.length === 0) {
+                console.log('No active game found by priority. Fetching most recently updated show...');
+                records = await this.pb.collection(CONFIG.COLLECTION_TEAMS).getFullList({
+                    sort: '-updated',
+                    perPage: 1,
+                    $autoCancel: false
+                });
+                console.log('Most recently updated records found:', records.length);
             }
 
             if (records.length === 0) {
-                throw new Error('No active game found with priority 1 or 2');
+                throw new Error('No game record found in database');
             }
 
-            // Take the first record (earliest date)
+            // Take the first record
             this.gameRecord = records[0];
+            this.gameRecord.teamnumber = Math.max(1, parseInt(this.gameRecord.teamnumber, 10) || 1);
             this.currentGameId = this.gameRecord.id;
 
             // Update UI
@@ -121,6 +141,13 @@ class TeamXDisplay {
 
             // Set CSS variable for team count
             this.setTeamCountCSS(this.gameRecord.teamnumber);
+
+            // Update QR Code to direct players to this specific show
+            const qrImage = document.querySelector('.qr-code');
+            if (qrImage) {
+                const phoneUrl = `https://www.pinkmilk.eu/teamx/phone/?showId=${encodeURIComponent(this.currentGameId)}`;
+                qrImage.src = `https://api.qrserver.com/v1/create-qr-code/?size=400x400&data=${encodeURIComponent(phoneUrl)}`;
+            }
 
             console.log('Game loaded:', this.gameRecord.show);
             console.log('Show date:', this.gameRecord.datum);

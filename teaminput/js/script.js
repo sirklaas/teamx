@@ -19,8 +19,30 @@
         console.log('TeamX Input - VERSION 2.2.0 - PocketBase Integration initialized');
         console.log('If you see this message, the new code is deployed correctly.');
 
+        prepareNewGameCode();
         initPocketBase();
     });
+
+    const GAME_CODE_ALPHABET = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789';
+
+    function createGameCode() {
+        const bytes = new Uint32Array(8);
+        crypto.getRandomValues(bytes);
+        return Array.from(bytes, byte => GAME_CODE_ALPHABET[byte % GAME_CODE_ALPHABET.length]).join('');
+    }
+
+    function getTeamFunUrl(gameCode) {
+        return `https://www.pinkmilk.eu/teamfun/${encodeURIComponent(gameCode)}`;
+    }
+
+    function prepareNewGameCode() {
+        const input = document.querySelector('.blank-form input[name="gamecode"]');
+        if (!input) return;
+
+        const gameCode = createGameCode();
+        input.value = gameCode;
+        input.title = getTeamFunUrl(gameCode);
+    }
 
     function formatMonthDayNl(datum) {
         if (!datum) return '';
@@ -74,9 +96,11 @@
             const collections = await pb.collections.getList(1, 50);
             const teamxCollection = collections.items.find(c => c.name === CONFIG.COLLECTION);
             if (teamxCollection) {
-                const buroField = teamxCollection.schema.find(f => f.name === 'buro');
-                if (buroField && buroField.options && buroField.options.values) {
-                    buroOptions = buroField.options.values;
+                const collectionFields = teamxCollection.fields || teamxCollection.schema || [];
+                const buroField = collectionFields.find(f => f.name === 'buro');
+                const values = buroField?.values || buroField?.options?.values;
+                if (values) {
+                    buroOptions = values;
                     console.log('Loaded buro options from PB schema:', buroOptions);
                 }
             }
@@ -113,6 +137,12 @@
             const selected = selectEl.getAttribute('data-selected-buro') || '';
             fillBuroSelect(selectEl, selected);
         });
+    }
+
+    function getPocketBaseErrorMessage(error) {
+        const fields = error?.response?.data || error?.data || {};
+        const firstFieldError = Object.values(fields).find(value => value && typeof value.message === 'string');
+        return firstFieldError?.message || error?.message || 'Onbekende fout';
     }
 
     /**
@@ -245,7 +275,8 @@
         const audioInput = record.audio_input || 'None';
         const parking = record.parking || '';
         const priority = record.priority || '';
-        const photoCircle = record.url || '';  // PocketBase field is 'url'
+        const gameCode = record.gamecode || '';
+        const teamFunUrl = gameCode ? getTeamFunUrl(gameCode) : '';
 
         const startTime = record.start_time || '18:00';
         const buro = record.buro || '';
@@ -265,7 +296,7 @@
         console.log(`Loading record "${showName}":`, {
             datum: datum,
             original_datum: record.datum,
-            photo_circle: photoCircle,
+            gamecode: gameCode,
             priority: priority
         });
 
@@ -338,8 +369,10 @@
                 </div>
 
                 <div class="form-field">
-                    <label>PhotoCircle</label>
-                    <input type="text" name="photo_circle" value="${escapeHtml(photoCircle)}">
+                    <label>TeamFun link</label>
+                    ${teamFunUrl
+                        ? `<a href="${escapeHtml(teamFunUrl)}" target="_blank" rel="noopener">${escapeHtml(teamFunUrl)}</a>`
+                        : '<span>Nog geen TeamFun-link</span>'}
                 </div>
 
                 <div class="form-field">
@@ -460,7 +493,7 @@
                 tv_screen: data.tv_screen || 'None',
                 audio_input: data.audio_input || 'None',
                 parking: data.parking || '',
-                url: data.photo_circle || '',  // PocketBase field is 'url'
+                gamecode: data.gamecode || createGameCode(),
                 telefoons: data.telefoons === '1',
                 spa_rood: data.spa_rood === '1'
             };
@@ -475,13 +508,14 @@
 
             // Reset form
             form.reset();
+            prepareNewGameCode();
 
             // Reload data to show new record
             await loadDataFromPocketBase();
 
         } catch (error) {
             console.error('Error creating record:', error);
-            showMessage('Fout bij opslaan: ' + error.message, 'error');
+            showMessage('Fout bij opslaan: ' + getPocketBaseErrorMessage(error), 'error');
         }
     }
 
@@ -507,7 +541,6 @@
                 tv_screen: data.tv_screen || 'None',
                 audio_input: data.audio_input || 'None',
                 parking: data.parking || '',
-                url: data.photo_circle || '',  // PocketBase field is 'url'
                 telefoons: data.telefoons === '1',
                 spa_rood: data.spa_rood === '1'
             };
@@ -526,7 +559,7 @@
 
         } catch (error) {
             console.error('Error updating record:', error);
-            showMessage('Fout bij bijwerken: ' + error.message, 'error');
+            showMessage('Fout bij bijwerken: ' + getPocketBaseErrorMessage(error), 'error');
         }
     }
 

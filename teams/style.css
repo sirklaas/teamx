@@ -38,6 +38,8 @@ body {
 }
 
 .container {
+    --top-panel-offset: 2.88vh;
+    --top-panel-height: 22vh;
     width: 100%;
     height: 100vh;
     max-width: 100%;
@@ -61,13 +63,22 @@ body {
 }
 
 .info-section {
-    padding: 2rem;
+    position: fixed;
+    top: var(--top-panel-offset);
+    left: 50%;
+    width: min(46vw, 820px);
+    height: var(--top-panel-height);
+    padding: 1.5rem 2rem;
     background: rgba(255, 255, 255, 0.2);
     backdrop-filter: blur(10px);
     border-radius: 30px;
-    display: inline-block;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    transform: translateX(-50%);
     box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
-    max-height: 100%;
+    box-sizing: border-box;
+    z-index: 100;
 }
 
 .presenter-name {
@@ -111,10 +122,10 @@ body {
 /* QR Code Container */
 .qr-code-container {
     position: fixed;
-    top: 2.88vh;
-    left: 2.88vh;
-    width: 220px;
-    height: 220px;
+    top: var(--top-panel-offset);
+    left: var(--top-panel-offset);
+    width: var(--top-panel-height);
+    height: var(--top-panel-height);
     background: white;
     padding: 15px;
     border-radius: 20px;
@@ -132,8 +143,8 @@ body {
 }
 
 .qr-code {
-    width: 180px;
-    height: 180px;
+    width: 100%;
+    height: 100%;
     object-fit: contain;
 }
 
@@ -496,6 +507,13 @@ body {
 }
 
 @media (max-width: 768px) {
+    .info-section {
+        position: static;
+        width: calc(100% - 2rem);
+        height: auto;
+        transform: none;
+    }
+
     .show-title {
         font-size: 3rem;
     }
@@ -557,16 +575,16 @@ body {
 /* Latest Photos Container Style (Top Right) */
 .latest-photos-container {
     position: fixed;
-    top: 2.88vh;
-    right: 2.88vh;
+    top: var(--top-panel-offset);
+    right: var(--top-panel-offset);
     width: 320px;
-    height: 220px;
+    height: var(--top-panel-height);
     background: rgba(255, 255, 255, 0.15);
     backdrop-filter: blur(15px);
     padding: 8px;
     border-radius: 20px;
     box-shadow: 0 10px 40px rgba(0, 0, 0, 0.25);
-    border: 2px solid rgba(255, 255, 255, 0.15);
+    border: 1px solid rgba(255, 255, 255, 0.95);
     display: flex;
     align-items: center;
     justify-content: center;

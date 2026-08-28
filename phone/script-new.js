@@ -57,7 +57,6 @@ class TeamXRegistration {
                 if (attempt > 1) {
                     console.log(`Retrying initialization (attempt ${attempt}/${maxRetries})...`);
                 }
-                await this.authenticatePocketBase();
                 await this.loadGameData();
                 this.restoreReturningPlayer();
                 this.setupRealtimeUpdates();
@@ -75,50 +74,70 @@ class TeamXRegistration {
         }
     }
 
-    async authenticatePocketBase() {
-        try {
-            console.log('Authenticating with PocketBase...');
-            await this.pb.collection("_superusers").authWithPassword(CONFIG.ADMIN_EMAIL, CONFIG.ADMIN_PASSWORD);
-            console.log('Authentication successful');
-        } catch (error) {
-            console.error('Authentication failed:', error);
-            throw new Error('Authentication failed');
-        }
-    }
-
     async loadGameData() {
         try {
             console.log('Loading game data...');
 
-            // First try: Get shows with priority 1, sorted by date (earliest first)
-            let records = await this.pb.collection(CONFIG.COLLECTION_TEAMS).getFullList({
-                filter: 'priority = 1 && teamnumber > 0',
-                sort: 'datum',
-                $autoCancel: false
-            });
+            // Get showId or gamecode from URL if present
+            const params = new URLSearchParams(window.location.search);
+            const urlShowId = params.get('showId') || params.get('id');
+            const urlGameCode = params.get('gamecode') || params.get('code');
 
-            console.log('Priority 1 records found:', records.length);
+            let records = [];
+            if (urlShowId) {
+                try {
+                    console.log('Fetching show matching URL showId:', urlShowId);
+                    const record = await this.pb.collection(CONFIG.COLLECTION_TEAMS).getOne(urlShowId, {
+                        $autoCancel: false
+                    });
+                    if (record) records = [record];
+                } catch (e) {
+                    console.warn('Failed to fetch show by URL ID:', e);
+                }
+            } else if (urlGameCode) {
+                try {
+                    console.log('Fetching show matching URL gamecode:', urlGameCode);
+                    const list = await this.pb.collection(CONFIG.COLLECTION_TEAMS).getFullList({
+                        filter: `gamecode = "${urlGameCode}"`,
+                        $autoCancel: false
+                    });
+                    if (list && list.length > 0) records = [list[0]];
+                } catch (e) {
+                    console.warn('Failed to fetch show by URL gamecode:', e);
+                }
+            }
 
-            // Fallback: If no priority 1 shows, try priority 2
+            // Active show lookup: Priority is strictly leading (1 first, then 2, 3...)
+            // with newest created (-created) as secondary sort for ties
             if (records.length === 0) {
-                console.log('No priority 1 shows, trying priority 2...');
                 records = await this.pb.collection(CONFIG.COLLECTION_TEAMS).getFullList({
-                    filter: 'priority = 2 && teamnumber > 0',
-                    sort: 'datum',
+                    filter: 'priority > 0',
+                    sort: 'priority,-created',
                     $autoCancel: false
                 });
-                console.log('Priority 2 records found:', records.length);
+                console.log('Active priority records found:', records.length);
+            }
+
+            // Fallback: Fetch most recently updated show in database if no priority > 0 exists
+            if (records.length === 0) {
+                console.log('No active game found by priority. Fetching most recently updated show...');
+                records = await this.pb.collection(CONFIG.COLLECTION_TEAMS).getFullList({
+                    sort: '-updated',
+                    perPage: 1,
+                    $autoCancel: false
+                });
+                console.log('Most recently updated records found:', records.length);
             }
 
             if (records.length === 0) {
-                throw new Error('No active game found with priority 1 or 2');
+                throw new Error('No active game found in database');
             }
 
-            // Take the first record (earliest date)
+            // Take the first record (latest date/created)
             this.gameRecord = records[0];
             this.currentGameId = this.gameRecord.id;
-            this.totalTeams = this.gameRecord.teamnumber;
-            this.totalPlayers = this.gameRecord.players;
+            this.totalTeams = Math.max(1, parseInt(this.gameRecord.teamnumber, 10) || 1);
+            this.totalPlayers = parseInt(this.gameRecord.players, 10) || 0;
 
             // Update UI
             this.elements.showName.textContent = this.gameRecord.show || 'QuizMaster Klaas presenteert';
@@ -127,6 +146,7 @@ class TeamXRegistration {
             console.log('Game loaded:', this.gameRecord.show);
             console.log('Show date:', this.gameRecord.datum);
             console.log('Priority:', this.gameRecord.priority);
+            console.log('Total teams:', this.totalTeams);
         } catch (error) {
             console.error('Error loading game data:', error);
             this.elements.showName.textContent = 'Geen actieve quiz gevonden (zet priority op 1 of 2)';
@@ -135,14 +155,8 @@ class TeamXRegistration {
     }
 
     setupRealtimeUpdates() {
-        try {
-            this.pb.collection(CONFIG.COLLECTION_PLAYERS).subscribe('*', (e) => {
-                console.log('Realtime update:', e.action);
-            });
-            console.log('Realtime updates initialized');
-        } catch (error) {
-            console.error('Error setting up realtime updates:', error);
-        }
+        // Registration is handled by the same-origin server helper. The phone
+        // page does not need a direct realtime subscription to player records.
     }
 
     restoreReturningPlayer() {
@@ -157,11 +171,17 @@ class TeamXRegistration {
 
         this.elements.returningGreeting.textContent = `Hi ${returningPlayer.playerName}, welkom terug`;
         this.elements.returningGreeting.classList.add('show');
+        this.hideNameEntryForReturningPlayer();
         this.showTeamAssignment({
             naam: returningPlayer.playerName,
             playernr: returningPlayer.playerNumber,
             teamnr: returningPlayer.teamNumber
         });
+    }
+
+    hideNameEntryForReturningPlayer() {
+        this.elements.inputGroup.style.display = 'none';
+        this.elements.playerNameInput.disabled = true;
     }
 
     setupEventListeners() {
@@ -318,64 +338,25 @@ class TeamXRegistration {
         }
     }
 
-    async createPlayer(name, retryCount = 0) {
+    async createPlayer(name) {
         this.showLoading(true);
         this.playSound('enter');
 
         try {
-            // Get current playerData from show record
-            const currentShow = await this.pb.collection(CONFIG.COLLECTION_TEAMS).getOne(this.currentGameId, {
-                $autoCancel: false
+            const response = await fetch('api/register.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    showId: this.currentGameId,
+                    name
+                })
             });
-
-            const playerdata = currentShow.playerData || [];
-            console.log('Current playerdata length:', playerdata.length);
-
-            // CRITICAL: Final check for duplicates before adding (race condition guard)
-            const existingPlayer = playerdata.find(p => p.naam && p.naam.toLowerCase() === name.toLowerCase());
-            if (existingPlayer) {
-                console.log('Name already exists in latest playerdata, showing existing team');
-                this.showTeamAssignment(existingPlayer);
-                return;
+            const result = await response.json();
+            if (!response.ok || !result.success) {
+                throw new Error(result.error || 'Registratie mislukt');
             }
 
-            // Get unique player number
-            const playerNumber = this.getNextPlayerNumber(playerdata);
-
-            // Get team assignment
-            const teamNumber = this.getNextTeamFromData(playerdata);
-
-            // Create new player object
-            const newPlayer = {
-                naam: name,
-                teamnr: teamNumber,
-                playernr: playerNumber
-            };
-
-            // Add to playerdata array
-            playerdata.push(newPlayer);
-
-            // Update show record with new playerData
-            try {
-                await this.pb.collection(CONFIG.COLLECTION_TEAMS).update(this.currentGameId, {
-                    playerData: playerdata
-                }, {
-                    $autoCancel: false
-                });
-
-                console.log('Player added to playerdata:', newPlayer);
-            } catch (updateError) {
-                // If update fails due to concurrent modification, retry
-                if (retryCount < 3) {
-                    console.warn(`Update conflict, retrying... (attempt ${retryCount + 1})`);
-                    this.showLoading(false);
-                    return await this.createPlayer(name, retryCount + 1);
-                }
-                throw updateError;
-            }
-
-            // Show team assignment
-            this.showTeamAssignment(newPlayer);
+            this.showTeamAssignment(result.player);
         } catch (error) {
             console.error('Error creating player:', error);
             throw error;
