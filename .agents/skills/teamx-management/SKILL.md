@@ -47,14 +47,19 @@ git commit -m "Your descriptive commit message"
 git push origin main
 ```
 
-### 2. Live Upload (FTP)
-The live application is hosted on `pinkmilk.eu`. Files must be uploaded to the server via FTP:
-- **FTP Host**: `103.214.6.202`
-- **FTP Port**: `21`
-- **FTP User**: `dukowaeu`
-- **FTP Remote Path**: `/domains/pinkmilk.eu/public_html/`
-  - `phone/` -> `/domains/pinkmilk.eu/public_html/phone/`
-  - `teams/` -> `/domains/pinkmilk.eu/public_html/teams/`
-  - `teaminput/` -> `/domains/pinkmilk.eu/public_html/teaminput/`
+### 2. Live Upload (FTP with Doppler)
+The live application is hosted on `pinkmilk.eu`. Secrets are managed via **Doppler** in project `pinkmilk-dashboard` (`prd`):
+- `FTP_HOST`
+- `FTP_PORT`
+- `FTP_USER`
+- `FTP_PASS`
 
-You can use the helper script or write a Python FTP script to automate this transfer.
+Run the deployment script with Doppler:
+```bash
+doppler run --project pinkmilk-dashboard --config prd -- python3 deploy_ftp.py
+```
+This deploys:
+- `phone/` -> `/domains/pinkmilk.eu/public_html/phone/`
+- `teams/` -> `/domains/pinkmilk.eu/public_html/teams/`
+- `teaminput/` -> `/domains/pinkmilk.eu/public_html/teaminput/`
+- `teamfun/` -> `/domains/pinkmilk.eu/public_html/teamfun/`
