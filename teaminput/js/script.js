@@ -20,6 +20,7 @@
         console.log('If you see this message, the new code is deployed correctly.');
 
         prepareNewGameCode();
+        initBlankFormRanking();
         initPocketBase();
     });
 
@@ -42,6 +43,65 @@
         const gameCode = createGameCode();
         input.value = gameCode;
         input.title = getTeamFunUrl(gameCode);
+    }
+
+    function initBlankFormRanking() {
+        const blank = document.querySelector('.blank-form');
+        if (!blank) return;
+        const btn = blank.querySelector('.btn-ranking-export');
+        const excelIn = blank.querySelector('.ranking-excel-input');
+        if (excelIn) {
+            excelIn.addEventListener('change', (e) => {
+                const file = e.target.files && e.target.files[0];
+                const status = blank.querySelector('.ranking-excel-status');
+                if (file && status) {
+                    status.textContent = `Geselecteerd: ${file.name} (${Math.round(file.size / 1024)} KB)`;
+                }
+            });
+        }
+        if (btn) {
+            btn.addEventListener('click', async () => {
+                const form = blank.querySelector('.game-form');
+                const showNameInput = form ? form.querySelector('[name="game_name"]') : null;
+                if (!showNameInput || !showNameInput.value.trim()) {
+                    showMessage('Vul eerst een show naam in voor de nieuwe show', 'error');
+                    showNameInput?.focus();
+                    return;
+                }
+                let recordId = form.getAttribute('data-record-id');
+                if (recordId === 'new') {
+                    const formData = new FormData(form);
+                    const data = {};
+                    for (let [k, v] of formData.entries()) data[k] = v;
+                    showMessage('Show eerst opslaan in TeamX...', 'info');
+                    try {
+                        const pbData = {
+                            show: data.game_name,
+                            datum: data.datum || '',
+                            start_time: data.start_time || '18:00',
+                            buro: data.buro || '',
+                            teamnumber: parseInt(data.hoeveel_teams) || 4,
+                            players: parseInt(data.players) || 20,
+                            notities: data.notities || '',
+                            priority: data.priority !== '' ? parseInt(data.priority) : 1,
+                            tv_screen: data.tv_screen || 'None',
+                            audio_input: data.audio_input || 'None',
+                            parking: data.parking || '',
+                            gamecode: data.gamecode || createGameCode(),
+                            telefoons: data.telefoons === '1',
+                            spa_rood: data.spa_rood === '1'
+                        };
+                        const created = await pb.collection(CONFIG.COLLECTION).create(pbData);
+                        recordId = created.id;
+                        form.setAttribute('data-record-id', created.id);
+                    } catch (e) {
+                        showMessage('Fout bij aanmaken TeamX show: ' + e.message, 'error');
+                        return;
+                    }
+                }
+                await exportToRanking(recordId, blank);
+            });
+        }
     }
 
     function formatMonthDayNl(datum) {
