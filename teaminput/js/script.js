@@ -391,6 +391,19 @@
                 </div>
 
                 <button type="submit" class="btn-save">Update</button>
+
+                <div class="ranking-export-box">
+                    <div class="ranking-export-title">🎮 Ranking Koppeling (Photo App + Show)</div>
+                    <div class="form-field" style="margin-bottom: 6px;">
+                        <label style="color:#c7d2fe; font-size:12px; margin-bottom: 4px;">Upload Excel met Spelersnamen (.xlsx/.xls)</label>
+                        <input type="file" class="ranking-excel-input" accept=".xlsx, .xls, .csv">
+                        <div class="ranking-excel-status" style="font-size:11px; color:#94a3b8; margin-top:2px;"></div>
+                    </div>
+                    <button type="button" class="btn-ranking-export" data-record-id="${record.id}">
+                        🎮 Maak / Update Ranking Show
+                    </button>
+                    <div class="ranking-result-message hidden"></div>
+                </div>
             </form>
         `;
 
@@ -407,6 +420,23 @@
         // Add form submit handler
         const form = block.querySelector('.game-form');
         form.addEventListener('submit', handleFormSubmit);
+
+        // Add ranking export button handler
+        const rankingBtn = block.querySelector('.btn-ranking-export');
+        if (rankingBtn) {
+            rankingBtn.addEventListener('click', () => exportToRanking(record.id, block));
+        }
+
+        const excelIn = block.querySelector('.ranking-excel-input');
+        if (excelIn) {
+            excelIn.addEventListener('change', (e) => {
+                const file = e.target.files && e.target.files[0];
+                const status = block.querySelector('.ranking-excel-status');
+                if (file && status) {
+                    status.textContent = `Geselecteerd: ${file.name} (${Math.round(file.size / 1024)} KB)`;
+                }
+            });
+        }
     }
 
     /**
@@ -639,6 +669,129 @@
             messageEl.style.animation = 'slideIn 0.3s ease-out reverse';
             setTimeout(() => messageEl.remove(), 300);
         }, 3000);
+    }
+
+    /**
+     * Option A: Export/Sync Show to Ranking PocketBase collection
+     */
+    async function exportToRanking(recordId, blockEl) {
+        const statusMsg = blockEl.querySelector('.ranking-result-message');
+        const excelInput = blockEl.querySelector('.ranking-excel-input');
+        const form = blockEl.querySelector('.game-form');
+
+        function showResult(html, isSuccess) {
+            if (!statusMsg) return;
+            statusMsg.className = `ranking-result-message ${isSuccess ? 'success' : 'error'}`;
+            statusMsg.innerHTML = html;
+            statusMsg.classList.remove('hidden');
+        }
+
+        try {
+            showResult('⏳ Bezig met exporteren naar Ranking...', true);
+
+            // Read form/record values
+            const showTitle = blockEl.querySelector('h3')?.textContent?.trim() || 'Show';
+            const teamNumInput = form ? form.querySelector('[name="hoeveel_teams"]') : null;
+            const nrTeams = parseInt(teamNumInput ? teamNumInput.value : 4) || 4;
+            const playersInput = form ? form.querySelector('[name="players"]') : null;
+            const nrPlayers = parseInt(playersInput ? playersInput.value : 20) || 20;
+            const parkingInput = form ? form.querySelector('[name="parking"]') : null;
+            const city = parkingInput ? parkingInput.value : 'Rotterdam';
+
+            // Read player names from Excel if provided
+            let playerNamesList = [];
+            if (excelInput && excelInput.files && excelInput.files[0]) {
+                const file = excelInput.files[0];
+                const arrayBuffer = await file.arrayBuffer();
+                if (window.XLSX) {
+                    const workbook = window.XLSX.read(arrayBuffer, { type: 'array' });
+                    const sheetName = workbook.SheetNames[0];
+                    const sheet = workbook.Sheets[sheetName];
+                    const rows = window.XLSX.utils.sheet_to_json(sheet, { header: 1 });
+                    playerNamesList = rows
+                        .flat()
+                        .filter(cell => cell && typeof cell === 'string' && cell.trim() && !cell.toString().trim().match(/^(naam|name|speler|player|nr|team)$/i))
+                        .map(name => name.toString().trim());
+                }
+            }
+
+            // Format names with team prefixes (001 Speler1, 002 Speler2...)
+            let formattedPlayerNames = '';
+            if (playerNamesList.length > 0) {
+                formattedPlayerNames = playerNamesList.map((name, idx) => {
+                    if (name.match(/^\d{3}\s+/)) return name;
+                    const team = (idx % nrTeams) + 1;
+                    const prefix = team.toString().padStart(3, '0');
+                    return `${prefix} ${name}`;
+                }).join(', ');
+            } else {
+                // Fallback to numbered placeholders
+                const dummy = [];
+                for (let t = 1; t <= nrTeams; t++) {
+                    const prefix = t.toString().padStart(3, '0');
+                    for (let p = 1; p <= 5; p++) {
+                        dummy.push(`${prefix} Speler ${p}`);
+                    }
+                }
+                formattedPlayerNames = dummy.join(', ');
+            }
+
+            // Valid TeamX show ID for photo app upload relation
+            const validShowId = recordId;
+            const photocircleUrl = `https://www.pinkmilk.eu/phone/media.html?showId=${validShowId}`;
+
+            // Check if active ranking record exists (priority=1)
+            let existingRanking = null;
+            try {
+                const list = await pb.collection('ranking').getList(1, 1, {
+                    filter: 'priority = 1',
+                    sort: '-updated'
+                });
+                if (list.items && list.items.length > 0) {
+                    existingRanking = list.items[0];
+                }
+            } catch (e) {
+                console.log('Error checking existing ranking priority=1:', e);
+            }
+
+            const rankingPayload = {
+                showname: showTitle,
+                nr_teams: nrTeams,
+                nr_players: playerNamesList.length || nrPlayers,
+                playernames: formattedPlayerNames,
+                photocircle: photocircleUrl,
+                city: city || 'Rotterdam',
+                priority: 1,
+                current_fase: '01/01',
+                joined_players: [],
+                teamleaders: {},
+                headings: {},
+                endgame_state: { selectedCard: null, playbackState: 'grid', usedCards: [], teamSelections: {} }
+            };
+
+            let savedRecord;
+            if (existingRanking) {
+                savedRecord = await pb.collection('ranking').update(existingRanking.id, rankingPayload);
+            } else {
+                savedRecord = await pb.collection('ranking').create(rankingPayload);
+            }
+
+            console.log('Successfully synced Ranking record:', savedRecord);
+
+            showResult(`
+                ✅ <strong>Ranking Show succesvol gekoppeld!</strong><br>
+                • TeamX ID: <code>${validShowId}</code> (Photo App gereed)<br>
+                • Spelers: <strong>${playerNamesList.length || nrPlayers}</strong> verdeeld over <strong>${nrTeams}</strong> teams<br>
+                • Priority: <strong>1</strong> (actieve Ranking sessie)<br>
+                <a href="https://ranking.pinkmilk.eu/presenter" target="_blank" style="display:inline-block; margin-top:8px; padding:6px 12px; background:#4338ca; color:#fff; border-radius:6px; text-decoration:none; font-weight:bold; font-size:12px;">
+                    Open Ranking Presenter ↗
+                </a>
+            `, true);
+
+        } catch (err) {
+            console.error('Error exporting to ranking:', err);
+            showResult(`❌ Fout bij koppelen aan Ranking: ${err.message}`, false);
+        }
     }
 
     // Export functions for external use if needed

@@ -271,3 +271,70 @@ body {
     margin-top: 10px;
     font-style: italic;
 }
+
+/* Ranking Integration Box */
+.ranking-export-box {
+    margin-top: 15px;
+    padding: 12px;
+    background: linear-gradient(135deg, #1e1b4b 0%, #312e81 100%);
+    border: 1px solid #6366f1;
+    border-radius: 8px;
+    color: #e0e7ff;
+}
+
+.ranking-export-title {
+    font-size: 14px;
+    font-weight: bold;
+    color: #c7d2fe;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.btn-ranking-export {
+    width: 100%;
+    padding: 10px 12px;
+    background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    margin-top: 8px;
+}
+
+.btn-ranking-export:hover {
+    background: linear-gradient(135deg, #4338ca 0%, #6d28d9 100%);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(79, 70, 229, 0.4);
+}
+
+.ranking-excel-input {
+    font-size: 12px;
+    color: #cbd5e1;
+    margin-top: 4px;
+    width: 100%;
+}
+
+.ranking-result-message {
+    margin-top: 8px;
+    padding: 8px 10px;
+    border-radius: 6px;
+    font-size: 12px;
+    line-height: 1.4;
+}
+
+.ranking-result-message.success {
+    background: rgba(16, 185, 129, 0.2);
+    border: 1px solid #10b981;
+    color: #a7f3d0;
+}
+
+.ranking-result-message.error {
+    background: rgba(239, 68, 68, 0.2);
+    border: 1px solid #ef4444;
+    color: #fca5a5;
+}
