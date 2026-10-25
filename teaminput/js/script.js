@@ -48,6 +48,21 @@
     function initBlankFormRanking() {
         const blank = document.querySelector('.blank-form');
         if (!blank) return;
+        const toggleBtn = blank.querySelector('[data-ranking-toggle]');
+        const rankingBox = blank.querySelector('.ranking-export-box');
+        if (toggleBtn && rankingBox) {
+            toggleBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                toggleBtn.classList.toggle('active');
+                if (toggleBtn.classList.contains('active')) {
+                    rankingBox.classList.add('visible');
+                    rankingBox.style.display = 'block';
+                } else {
+                    rankingBox.classList.remove('visible');
+                    rankingBox.style.display = 'none';
+                }
+            });
+        }
         const btn = blank.querySelector('.btn-ranking-export');
         const excelIn = blank.querySelector('.ranking-excel-input');
         if (excelIn) {
@@ -365,7 +380,11 @@
 
         block.innerHTML = `
             <h3>${escapeHtml(showName)}</h3>
+            <div class="ranking-toggle-wrapper">
+                <button type="button" class="btn-ranking-toggle" data-ranking-toggle>🎮 Ranking</button>
+            </div>
             <form class="game-form" data-record-id="${record.id}">
+                <input type="hidden" name="game_name" value="${escapeHtml(showName)}">
                 <div class="form-row form-row-top">
                     <div class="form-field">
                         <label class="weekday-label" data-weekday-for="datum">${weekday ? escapeHtml(weekday) : 'Datum'}</label>
@@ -399,9 +418,9 @@
                 <div class="ranking-export-box">
                     <div class="ranking-export-title">🎮 Ranking Koppeling (Photo App + Show)</div>
                     <div class="form-field" style="margin-bottom: 8px;">
-                        <label style="color:#c7d2fe; font-size:12px; margin-bottom: 4px;">Upload Excel met Spelersnamen (.xlsx/.xls)</label>
+                        <label style="color:#6c757d; font-size:13px; margin-bottom: 4px;">Upload Excel met Spelersnamen (.xlsx/.xls)</label>
                         <input type="file" class="ranking-excel-input" accept=".xlsx, .xls, .csv">
-                        <div class="ranking-excel-status" style="font-size:11px; color:#94a3b8; margin-top:3px;"></div>
+                        <div class="ranking-excel-status" style="font-size:11px; color:#6c757d; margin-top:3px;"></div>
                     </div>
                     <button type="button" class="btn-ranking-export" data-record-id="${record.id}">
                         🎮 Maak / Update Ranking Show
@@ -481,6 +500,23 @@
         // Add form submit handler
         const form = block.querySelector('.game-form');
         form.addEventListener('submit', handleFormSubmit);
+
+        // Add ranking toggle button handler
+        const toggleBtn = block.querySelector('[data-ranking-toggle]');
+        const rankingBox = block.querySelector('.ranking-export-box');
+        if (toggleBtn && rankingBox) {
+            toggleBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                toggleBtn.classList.toggle('active');
+                if (toggleBtn.classList.contains('active')) {
+                    rankingBox.classList.add('visible');
+                    rankingBox.style.display = 'block';
+                } else {
+                    rankingBox.classList.remove('visible');
+                    rankingBox.style.display = 'none';
+                }
+            });
+        }
 
         // Add ranking export button handler
         const rankingBtn = block.querySelector('.btn-ranking-export');
@@ -751,7 +787,16 @@
             showResult('⏳ Bezig met exporteren naar Ranking...', true);
 
             // Read form/record values
-            const showTitle = blockEl.querySelector('h3')?.textContent?.trim() || 'Show';
+            const nameInput = form ? (form.querySelector('[name="game_name"]') || form.querySelector('[name="show"]')) : null;
+            let showTitle = (nameInput && nameInput.value.trim()) || '';
+            if (!showTitle || showTitle === 'Nieuwe') {
+                const h3Text = blockEl.querySelector('h3')?.textContent?.trim() || '';
+                if (h3Text && h3Text !== 'Nieuwe') {
+                    showTitle = h3Text;
+                } else {
+                    showTitle = 'Ranking Show';
+                }
+            }
             const teamNumInput = form ? form.querySelector('[name="hoeveel_teams"]') : null;
             const nrTeams = parseInt(teamNumInput ? teamNumInput.value : 4) || 4;
             const playersInput = form ? form.querySelector('[name="players"]') : null;
@@ -844,7 +889,7 @@
                 • TeamX ID: <code>${validShowId}</code> (Photo App gereed)<br>
                 • Spelers: <strong>${playerNamesList.length || nrPlayers}</strong> verdeeld over <strong>${nrTeams}</strong> teams<br>
                 • Priority: <strong>1</strong> (actieve Ranking sessie)<br>
-                <a href="https://ranking.pinkmilk.eu/presenter" target="_blank" style="display:inline-block; margin-top:8px; padding:6px 12px; background:#4338ca; color:#fff; border-radius:6px; text-decoration:none; font-weight:bold; font-size:12px;">
+                <a href="https://ranking.pinkmilk.eu/presenter" target="_blank" style="display:inline-block; margin-top:8px; padding:6px 12px; background:#212529; color:#fff; border-radius:6px; text-decoration:none; font-weight:500; font-size:13px; font-family:'Barlow Semi Condensed',sans-serif;">
                     Open Ranking Presenter ↗
                 </a>
             `, true);

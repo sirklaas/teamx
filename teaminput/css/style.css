@@ -272,21 +272,61 @@ body {
     font-style: italic;
 }
 
-/* Ranking Integration Box */
+/* Ranking Toggle Button under Showname */
+.ranking-toggle-wrapper {
+    margin-top: 8px;
+    margin-bottom: 4px;
+}
+
+.btn-ranking-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 14px;
+    background: #ffffff;
+    color: #6c757d;
+    border: 1px solid #ced4da;
+    border-radius: 6px;
+    font-family: 'Barlow Semi Condensed', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.btn-ranking-toggle:hover {
+    background: #f8f9fa;
+    color: #212529;
+    border-color: #adb5bd;
+}
+
+.btn-ranking-toggle.active {
+    background: #212529;
+    color: #ffffff;
+    border-color: #212529;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+}
+
+/* Ranking Integration Box - Clean styling matching the rest */
 .ranking-export-box {
     margin-top: 15px;
-    padding: 12px;
-    background: linear-gradient(135deg, #1e1b4b 0%, #312e81 100%);
-    border: 1px solid #6366f1;
+    padding: 14px;
+    background: #f8f9fa;
+    border: 1px solid #dee2e6;
     border-radius: 8px;
-    color: #e0e7ff;
+    color: #495057;
+    display: none; /* hidden until Ranking button is selected */
+}
+
+.ranking-export-box.visible {
+    display: block;
 }
 
 .ranking-export-title {
     font-size: 14px;
-    font-weight: bold;
-    color: #c7d2fe;
-    margin-bottom: 8px;
+    font-weight: 600;
+    color: #212529;
+    margin-bottom: 10px;
     display: flex;
     align-items: center;
     gap: 6px;
@@ -294,47 +334,52 @@ body {
 
 .btn-ranking-export {
     width: 100%;
-    padding: 10px 12px;
-    background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
-    color: white;
-    border: none;
+    padding: 10px 14px;
+    background: #212529;
+    color: #ffffff;
+    border: 1px solid #212529;
     border-radius: 6px;
+    font-family: 'Barlow Semi Condensed', sans-serif;
     font-size: 14px;
-    font-weight: 600;
+    font-weight: 500;
     cursor: pointer;
     transition: all 0.2s ease;
-    margin-top: 8px;
+    margin-top: 10px;
 }
 
 .btn-ranking-export:hover {
-    background: linear-gradient(135deg, #4338ca 0%, #6d28d9 100%);
-    transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(79, 70, 229, 0.4);
+    background: #343a40;
+    border-color: #343a40;
 }
 
 .ranking-excel-input {
-    font-size: 12px;
-    color: #cbd5e1;
+    font-family: 'Barlow Semi Condensed', sans-serif;
+    font-size: 13px;
+    color: #495057;
     margin-top: 4px;
     width: 100%;
+    background: #ffffff;
+    border: 1px solid #ced4da;
+    border-radius: 6px;
+    padding: 6px 10px;
 }
 
 .ranking-result-message {
-    margin-top: 8px;
-    padding: 8px 10px;
+    margin-top: 10px;
+    padding: 10px 12px;
     border-radius: 6px;
-    font-size: 12px;
+    font-size: 13px;
     line-height: 1.4;
 }
 
 .ranking-result-message.success {
-    background: rgba(16, 185, 129, 0.2);
-    border: 1px solid #10b981;
-    color: #a7f3d0;
+    background: #e6f4ea;
+    border: 1px solid #ceead6;
+    color: #137333;
 }
 
 .ranking-result-message.error {
-    background: rgba(239, 68, 68, 0.2);
-    border: 1px solid #ef4444;
-    color: #fca5a5;
+    background: #fce8e6;
+    border: 1px solid #fad2cf;
+    color: #c5221f;
 }
