@@ -395,6 +395,20 @@
                     </div>
                 </div>
 
+                <!-- Ranking Koppeling & Excel Upload -->
+                <div class="ranking-export-box">
+                    <div class="ranking-export-title">🎮 Ranking Koppeling (Photo App + Show)</div>
+                    <div class="form-field" style="margin-bottom: 8px;">
+                        <label style="color:#c7d2fe; font-size:12px; margin-bottom: 4px;">Upload Excel met Spelersnamen (.xlsx/.xls)</label>
+                        <input type="file" class="ranking-excel-input" accept=".xlsx, .xls, .csv">
+                        <div class="ranking-excel-status" style="font-size:11px; color:#94a3b8; margin-top:3px;"></div>
+                    </div>
+                    <button type="button" class="btn-ranking-export" data-record-id="${record.id}">
+                        🎮 Maak / Update Ranking Show
+                    </button>
+                    <div class="ranking-result-message hidden"></div>
+                </div>
+
                 <div class="form-field">
                     <label>TV Screen</label>
                     <div class="radio-box">
@@ -451,19 +465,6 @@
                 </div>
 
                 <button type="submit" class="btn-save">Update</button>
-
-                <div class="ranking-export-box">
-                    <div class="ranking-export-title">🎮 Ranking Koppeling (Photo App + Show)</div>
-                    <div class="form-field" style="margin-bottom: 6px;">
-                        <label style="color:#c7d2fe; font-size:12px; margin-bottom: 4px;">Upload Excel met Spelersnamen (.xlsx/.xls)</label>
-                        <input type="file" class="ranking-excel-input" accept=".xlsx, .xls, .csv">
-                        <div class="ranking-excel-status" style="font-size:11px; color:#94a3b8; margin-top:2px;"></div>
-                    </div>
-                    <button type="button" class="btn-ranking-export" data-record-id="${record.id}">
-                        🎮 Maak / Update Ranking Show
-                    </button>
-                    <div class="ranking-result-message hidden"></div>
-                </div>
             </form>
         `;
 
