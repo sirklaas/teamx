@@ -272,8 +272,12 @@ body {
     font-style: italic;
 }
 
-/* Ranking Toggle Button under Showname */
+/* Ranking & Bingo Toggle Buttons under Showname */
 .ranking-toggle-wrapper {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    flex-wrap: wrap;
     margin-top: 8px;
     margin-bottom: 4px;
 }
@@ -379,6 +383,113 @@ body {
 }
 
 .ranking-result-message.error {
+    background: #fce8e6;
+    border: 1px solid #fad2cf;
+    color: #c5221f;
+}
+
+/* Bingo Toggle Button under Showname */
+.btn-bingo-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 14px;
+    background: #ffffff;
+    color: #6c757d;
+    border: 1px solid #ced4da;
+    border-radius: 6px;
+    font-family: 'Barlow Semi Condensed', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.btn-bingo-toggle:hover {
+    background: #fff0f6;
+    color: #ff2d86;
+    border-color: #ff729f;
+}
+
+.btn-bingo-toggle.active {
+    background: #ff2d86;
+    color: #ffffff;
+    border-color: #ff2d86;
+    box-shadow: 0 2px 6px rgba(255, 45, 134, 0.25);
+}
+
+/* Bingo Integration Box */
+.bingo-export-box {
+    margin-top: 15px;
+    padding: 14px;
+    background: #fdf2f7;
+    border: 1px solid #fcc2d7;
+    border-radius: 8px;
+    color: #495057;
+    display: none;
+}
+
+.bingo-export-box.visible {
+    display: block;
+}
+
+.bingo-export-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: #d6336c;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.btn-bingo-export {
+    width: 100%;
+    padding: 10px 14px;
+    background: #ff2d86;
+    color: #ffffff;
+    border: 1px solid #ff2d86;
+    border-radius: 6px;
+    font-family: 'Barlow Semi Condensed', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    margin-top: 10px;
+}
+
+.btn-bingo-export:hover {
+    background: #e02475;
+    border-color: #e02475;
+}
+
+.bingo-excel-input {
+    font-family: 'Barlow Semi Condensed', sans-serif;
+    font-size: 13px;
+    color: #495057;
+    margin-top: 4px;
+    width: 100%;
+    background: #ffffff;
+    border: 1px solid #ced4da;
+    border-radius: 6px;
+    padding: 6px 10px;
+}
+
+.bingo-result-message {
+    margin-top: 10px;
+    padding: 10px 12px;
+    border-radius: 6px;
+    font-size: 13px;
+    line-height: 1.4;
+}
+
+.bingo-result-message.success {
+    background: #e6f4ea;
+    border: 1px solid #ceead6;
+    color: #137333;
+}
+
+.bingo-result-message.error {
     background: #fce8e6;
     border: 1px solid #fad2cf;
     color: #c5221f;

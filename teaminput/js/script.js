@@ -21,6 +21,7 @@
 
         prepareNewGameCode();
         initBlankFormRanking();
+        initBlankFormBingo();
         initPocketBase();
     });
 
@@ -50,6 +51,8 @@
         if (!blank) return;
         const toggleBtn = blank.querySelector('[data-ranking-toggle]');
         const rankingBox = blank.querySelector('.ranking-export-box');
+        const bingoToggleBtn = blank.querySelector('[data-bingo-toggle]');
+        const bingoBox = blank.querySelector('.bingo-export-box');
         if (toggleBtn && rankingBox) {
             toggleBtn.addEventListener('click', (e) => {
                 e.preventDefault();
@@ -57,6 +60,11 @@
                 if (toggleBtn.classList.contains('active')) {
                     rankingBox.classList.add('visible');
                     rankingBox.style.display = 'block';
+                    if (bingoToggleBtn && bingoBox) {
+                        bingoToggleBtn.classList.remove('active');
+                        bingoBox.classList.remove('visible');
+                        bingoBox.style.display = 'none';
+                    }
                 } else {
                     rankingBox.classList.remove('visible');
                     rankingBox.style.display = 'none';
@@ -115,6 +123,87 @@
                     }
                 }
                 await exportToRanking(recordId, blank);
+            });
+        }
+    }
+
+    function initBlankFormBingo() {
+        const blank = document.querySelector('.blank-form');
+        if (!blank) return;
+        const toggleBtn = blank.querySelector('[data-bingo-toggle]');
+        const bingoBox = blank.querySelector('.bingo-export-box');
+        const rankingToggleBtn = blank.querySelector('[data-ranking-toggle]');
+        const rankingBox = blank.querySelector('.ranking-export-box');
+        if (toggleBtn && bingoBox) {
+            toggleBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                toggleBtn.classList.toggle('active');
+                if (toggleBtn.classList.contains('active')) {
+                    bingoBox.classList.add('visible');
+                    bingoBox.style.display = 'block';
+                    if (rankingToggleBtn && rankingBox) {
+                        rankingToggleBtn.classList.remove('active');
+                        rankingBox.classList.remove('visible');
+                        rankingBox.style.display = 'none';
+                    }
+                } else {
+                    bingoBox.classList.remove('visible');
+                    bingoBox.style.display = 'none';
+                }
+            });
+        }
+        const btn = blank.querySelector('.btn-bingo-export');
+        const excelIn = blank.querySelector('.bingo-excel-input');
+        if (excelIn) {
+            excelIn.addEventListener('change', (e) => {
+                const file = e.target.files && e.target.files[0];
+                const status = blank.querySelector('.bingo-excel-status');
+                if (file && status) {
+                    status.textContent = `Geselecteerd: ${file.name} (${Math.round(file.size / 1024)} KB)`;
+                }
+            });
+        }
+        if (btn) {
+            btn.addEventListener('click', async () => {
+                const form = blank.querySelector('.game-form');
+                const showNameInput = form ? form.querySelector('[name="game_name"]') : null;
+                if (!showNameInput || !showNameInput.value.trim()) {
+                    showMessage('Vul eerst een show naam in voor de nieuwe show', 'error');
+                    showNameInput?.focus();
+                    return;
+                }
+                let recordId = form.getAttribute('data-record-id');
+                if (recordId === 'new') {
+                    const formData = new FormData(form);
+                    const data = {};
+                    for (let [k, v] of formData.entries()) data[k] = v;
+                    showMessage('Show eerst opslaan in TeamX...', 'info');
+                    try {
+                        const pbData = {
+                            show: data.game_name,
+                            datum: data.datum || '',
+                            start_time: data.start_time || '18:00',
+                            buro: data.buro || '',
+                            teamnumber: parseInt(data.hoeveel_teams) || 4,
+                            players: parseInt(data.players) || 20,
+                            notities: data.notities || '',
+                            priority: data.priority !== '' ? parseInt(data.priority) : 1,
+                            tv_screen: data.tv_screen || 'None',
+                            audio_input: data.audio_input || 'None',
+                            parking: data.parking || '',
+                            gamecode: data.gamecode || createGameCode(),
+                            telefoons: data.telefoons === '1',
+                            spa_rood: data.spa_rood === '1'
+                        };
+                        const created = await pb.collection(CONFIG.COLLECTION).create(pbData);
+                        recordId = created.id;
+                        form.setAttribute('data-record-id', created.id);
+                    } catch (e) {
+                        showMessage('Fout bij aanmaken TeamX show: ' + e.message, 'error');
+                        return;
+                    }
+                }
+                await exportToBingo(recordId, blank);
             });
         }
     }
@@ -382,6 +471,7 @@
             <h3>${escapeHtml(showName)}</h3>
             <div class="ranking-toggle-wrapper">
                 <button type="button" class="btn-ranking-toggle" data-ranking-toggle>🎮 Ranking</button>
+                <button type="button" class="btn-bingo-toggle" data-bingo-toggle>🎉 Bingo</button>
             </div>
             <form class="game-form" data-record-id="${record.id}">
                 <input type="hidden" name="game_name" value="${escapeHtml(showName)}">
@@ -426,6 +516,20 @@
                         🎮 Maak / Update Ranking Show
                     </button>
                     <div class="ranking-result-message hidden"></div>
+                </div>
+
+                <!-- Bingo Koppeling & Excel Upload -->
+                <div class="bingo-export-box">
+                    <div class="bingo-export-title">🎉 Crazy Bingo Koppeling (Spelers + Show)</div>
+                    <div class="form-field" style="margin-bottom: 8px;">
+                        <label style="color:#6c757d; font-size:13px; margin-bottom: 4px;">Upload Excel met Spelersnamen (.xlsx/.xls)</label>
+                        <input type="file" class="bingo-excel-input" accept=".xlsx, .xls, .csv">
+                        <div class="bingo-excel-status" style="font-size:11px; color:#6c757d; margin-top:3px;"></div>
+                    </div>
+                    <button type="button" class="btn-bingo-export" data-record-id="${record.id}">
+                        🎉 Maak / Update Bingo Show
+                    </button>
+                    <div class="bingo-result-message hidden"></div>
                 </div>
 
                 <div class="form-field">
@@ -504,6 +608,8 @@
         // Add ranking toggle button handler
         const toggleBtn = block.querySelector('[data-ranking-toggle]');
         const rankingBox = block.querySelector('.ranking-export-box');
+        const bingoToggleBtn = block.querySelector('[data-bingo-toggle]');
+        const bingoBox = block.querySelector('.bingo-export-box');
         if (toggleBtn && rankingBox) {
             toggleBtn.addEventListener('click', (e) => {
                 e.preventDefault();
@@ -511,9 +617,34 @@
                 if (toggleBtn.classList.contains('active')) {
                     rankingBox.classList.add('visible');
                     rankingBox.style.display = 'block';
+                    if (bingoToggleBtn && bingoBox) {
+                        bingoToggleBtn.classList.remove('active');
+                        bingoBox.classList.remove('visible');
+                        bingoBox.style.display = 'none';
+                    }
                 } else {
                     rankingBox.classList.remove('visible');
                     rankingBox.style.display = 'none';
+                }
+            });
+        }
+
+        // Add bingo toggle button handler
+        if (bingoToggleBtn && bingoBox) {
+            bingoToggleBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                bingoToggleBtn.classList.toggle('active');
+                if (bingoToggleBtn.classList.contains('active')) {
+                    bingoBox.classList.add('visible');
+                    bingoBox.style.display = 'block';
+                    if (toggleBtn && rankingBox) {
+                        toggleBtn.classList.remove('active');
+                        rankingBox.classList.remove('visible');
+                        rankingBox.style.display = 'none';
+                    }
+                } else {
+                    bingoBox.classList.remove('visible');
+                    bingoBox.style.display = 'none';
                 }
             });
         }
@@ -524,11 +655,28 @@
             rankingBtn.addEventListener('click', () => exportToRanking(record.id, block));
         }
 
+        // Add bingo export button handler
+        const bingoBtn = block.querySelector('.btn-bingo-export');
+        if (bingoBtn) {
+            bingoBtn.addEventListener('click', () => exportToBingo(record.id, block));
+        }
+
         const excelIn = block.querySelector('.ranking-excel-input');
         if (excelIn) {
             excelIn.addEventListener('change', (e) => {
                 const file = e.target.files && e.target.files[0];
                 const status = block.querySelector('.ranking-excel-status');
+                if (file && status) {
+                    status.textContent = `Geselecteerd: ${file.name} (${Math.round(file.size / 1024)} KB)`;
+                }
+            });
+        }
+
+        const bingoExcelIn = block.querySelector('.bingo-excel-input');
+        if (bingoExcelIn) {
+            bingoExcelIn.addEventListener('change', (e) => {
+                const file = e.target.files && e.target.files[0];
+                const status = block.querySelector('.bingo-excel-status');
                 if (file && status) {
                     status.textContent = `Geselecteerd: ${file.name} (${Math.round(file.size / 1024)} KB)`;
                 }
@@ -897,6 +1045,152 @@
         } catch (err) {
             console.error('Error exporting to ranking:', err);
             showResult(`❌ Fout bij koppelen aan Ranking: ${err.message}`, false);
+        }
+    }
+
+    /**
+     * Option B: Export/Sync Show to Crazy Bingo PocketBase collections (cb_shows, cb_players)
+     */
+    async function exportToBingo(recordId, blockEl) {
+        const statusMsg = blockEl.querySelector('.bingo-result-message');
+        const excelInput = blockEl.querySelector('.bingo-excel-input');
+        const form = blockEl.querySelector('.game-form');
+
+        function showResult(html, isSuccess) {
+            if (!statusMsg) return;
+            statusMsg.className = `bingo-result-message ${isSuccess ? 'success' : 'error'}`;
+            statusMsg.innerHTML = html;
+            statusMsg.classList.remove('hidden');
+        }
+
+        try {
+            showResult('⏳ Bezig met koppelen aan Crazy Bingo...', true);
+
+            // Read form/record values
+            const nameInput = form ? (form.querySelector('[name="game_name"]') || form.querySelector('[name="show"]')) : null;
+            let showTitle = (nameInput && nameInput.value.trim()) || '';
+            if (!showTitle || showTitle === 'Nieuwe') {
+                const h3Text = blockEl.querySelector('h3')?.textContent?.trim() || '';
+                if (h3Text && h3Text !== 'Nieuwe') {
+                    showTitle = h3Text;
+                } else {
+                    showTitle = 'Crazy Bingo Show';
+                }
+            }
+
+            // Read player names from Excel if provided
+            let playerNamesList = [];
+            if (excelInput && excelInput.files && excelInput.files[0]) {
+                const file = excelInput.files[0];
+                const arrayBuffer = await file.arrayBuffer();
+                if (window.XLSX) {
+                    const workbook = window.XLSX.read(arrayBuffer, { type: 'array' });
+                    const sheetName = workbook.SheetNames[0];
+                    const sheet = workbook.Sheets[sheetName];
+                    const rows = window.XLSX.utils.sheet_to_json(sheet, { header: 1 });
+                    playerNamesList = rows
+                        .flat()
+                        .filter(cell => cell && typeof cell === 'string' && cell.trim() && !cell.toString().trim().match(/^(naam|name|speler|player|nr|team)$/i))
+                        .map(name => name.toString().trim());
+                }
+            }
+
+            // Find or create cb_shows record for crazy-bingo
+            let showRecord = null;
+            try {
+                const list = await pb.collection('cb_shows').getList(1, 1, {
+                    filter: 'slug = "crazy-bingo"'
+                });
+                if (list.items && list.items.length > 0) {
+                    showRecord = list.items[0];
+                }
+            } catch (e) {
+                console.log('Error checking cb_shows:', e);
+            }
+
+            const introCue = {
+                round: 0,
+                heading: "Introductie",
+                content: "",
+                kind: "intro",
+                startedAt: Date.now(),
+                id: "intro-" + Date.now(),
+                drawnNumbers: [],
+                timeline: { past: [], future: [] }
+            };
+
+            if (showRecord) {
+                await pb.collection('cb_shows').update(showRecord.id, {
+                    title: showTitle,
+                    cue: introCue,
+                    startedAt: Date.now()
+                });
+            } else {
+                showRecord = await pb.collection('cb_shows').create({
+                    slug: 'crazy-bingo',
+                    title: showTitle,
+                    cue: introCue,
+                    startedAt: Date.now()
+                });
+            }
+
+            let playerCountMessage = '';
+            if (playerNamesList.length > 0) {
+                // Delete existing players for this show
+                const existingPlayers = await pb.collection('cb_players').getFullList({
+                    filter: `show = "${showRecord.id}"`
+                });
+                for (const p of existingPlayers) {
+                    await pb.collection('cb_players').delete(p.id);
+                }
+                // Add unique clean player names
+                const uniqueNames = [...new Set(playerNamesList)];
+                for (const name of uniqueNames) {
+                    await pb.collection('cb_players').create({
+                        show: showRecord.id,
+                        name: name,
+                        nameKey: name.toLocaleLowerCase('nl'),
+                        card: Array(25).fill(null),
+                        marked: Array(25).fill(false),
+                        pendingNumbers: [],
+                        tokenHash: ""
+                    });
+                }
+                playerCountMessage = `<strong>${uniqueNames.length}</strong> spelers geïmporteerd uit Excel`;
+            } else {
+                // Reset existing players cards and active token hashes
+                const existingPlayers = await pb.collection('cb_players').getFullList({
+                    filter: `show = "${showRecord.id}"`
+                });
+                for (const p of existingPlayers) {
+                    await pb.collection('cb_players').update(p.id, {
+                        card: Array(25).fill(null),
+                        marked: Array(25).fill(false),
+                        pendingNumbers: [],
+                        tokenHash: ""
+                    });
+                }
+                playerCountMessage = `<strong>${existingPlayers.length}</strong> bestaande spelers gereset (klaar voor check-in)`;
+            }
+
+            showResult(`
+                ✅ <strong>Crazy Bingo Show succesvol gekoppeld!</strong><br>
+                • Show: <strong>${escapeHtml(showTitle)}</strong><br>
+                • Spelers: ${playerCountMessage}<br>
+                • Status: <strong>Introductie actief (scherm toont QR & namen)</strong><br>
+                <div style="margin-top:10px; display:flex; gap:8px; flex-wrap:wrap;">
+                    <a href="https://bingo.pinkmilk.eu/presenter" target="_blank" style="display:inline-block; padding:6px 14px; background:#ff2d86; color:#fff4da; border-radius:6px; text-decoration:none; font-weight:600; font-size:13px; font-family:'Barlow Semi Condensed',sans-serif;">
+                        Open Bingo Presenter ↗
+                    </a>
+                    <a href="https://bingo.pinkmilk.eu/display" target="_blank" style="display:inline-block; padding:6px 14px; background:#131f3b; border:1px solid #36e4e8; color:#36e4e8; border-radius:6px; text-decoration:none; font-weight:600; font-size:13px; font-family:'Barlow Semi Condensed',sans-serif;">
+                        Open Display ↗
+                    </a>
+                </div>
+            `, true);
+
+        } catch (err) {
+            console.error('Error exporting to Bingo:', err);
+            showResult(`❌ Fout bij koppelen aan Bingo: ${err.message}`, false);
         }
     }
 

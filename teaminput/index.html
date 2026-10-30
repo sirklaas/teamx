@@ -24,6 +24,7 @@
                         <input type="text" name="game_name" required>
                         <div class="ranking-toggle-wrapper">
                             <button type="button" class="btn-ranking-toggle" data-ranking-toggle>🎮 Ranking</button>
+                            <button type="button" class="btn-bingo-toggle" data-bingo-toggle>🎉 Bingo</button>
                         </div>
                     </div>
 
@@ -69,6 +70,20 @@
                             🎮 Maak / Koppel Ranking Show
                         </button>
                         <div class="ranking-result-message hidden"></div>
+                    </div>
+
+                    <!-- Bingo Koppeling & Excel Upload -->
+                    <div class="bingo-export-box">
+                        <div class="bingo-export-title">🎉 Crazy Bingo Koppeling (Spelers + Show)</div>
+                        <div class="form-field" style="margin-bottom: 8px;">
+                            <label style="color:#6c757d; font-size:13px; margin-bottom: 4px;">Upload Excel met Spelersnamen (.xlsx/.xls)</label>
+                            <input type="file" class="bingo-excel-input" accept=".xlsx, .xls, .csv">
+                            <div class="bingo-excel-status" style="font-size:11px; color:#6c757d; margin-top:3px;"></div>
+                        </div>
+                        <button type="button" class="btn-bingo-export" data-record-id="new">
+                            🎉 Maak / Koppel Bingo Show
+                        </button>
+                        <div class="bingo-result-message hidden"></div>
                     </div>
 
                     <div class="form-field">
