@@ -16,6 +16,9 @@ button { font: inherit; }
 .show-header { max-width: none; margin: 0 auto 38px; text-align: center; }
 .show-date, .presented-by { margin: 0; color: #d9d4e4; font-size: clamp(1rem, 2vw, 1.25rem); font-weight: 400; }
 .presented-by { margin-top: 5px; color: #f0b851; }
+.secret-quizmaster-btn { background: none; border: 0; padding: 0; margin: 0; font: inherit; color: inherit; cursor: pointer; text-decoration: none; display: inline; outline: none; }
+.secret-quizmaster-btn:focus-visible { outline: 1px dashed rgba(240, 184, 81, .5); outline-offset: 2px; }
+.quizmaster-active .secret-quizmaster-btn { text-decoration: underline dotted #ef4444; }
 h1 { margin: 9px 0 0; font-size: clamp(2.25rem, 7vw, 5.75rem); line-height: .91; font-weight: 400; letter-spacing: -.035em; }
 
 @media (min-width: 561px) { h1 { white-space: nowrap; } }
@@ -31,6 +34,9 @@ h1 { margin: 9px 0 0; font-size: clamp(2.25rem, 7vw, 5.75rem); line-height: .91;
 .video-mark { position: absolute; right: 10px; bottom: 9px; display: grid; width: 31px; height: 31px; place-items: center; border-radius: 999px; background: rgba(0, 0, 0, .68); color: white; font-size: .86rem; }
 .select-control { position: absolute; top: 9px; left: 9px; width: 26px; height: 26px; opacity: 0; accent-color: #f0b851; cursor: pointer; transition: opacity 160ms ease; }
 .selection-active .select-control { opacity: 1; }
+.delete-control { position: absolute; top: 9px; right: 9px; width: 30px; height: 30px; border-radius: 999px; background: rgba(220, 38, 38, .88); color: white; border: 0; cursor: pointer; display: none; place-items: center; font-size: 14px; line-height: 1; z-index: 2; transition: transform 140ms ease, background 140ms ease; box-shadow: 0 2px 6px rgba(0,0,0,.4); }
+.delete-control:hover { background: #ef4444; transform: scale(1.1); }
+.quizmaster-active .delete-control { display: grid; }
 .media-tile.is-selected { outline: 3px solid #f0b851; outline-offset: -3px; }
 
 .selection-toolbar { position: sticky; bottom: 0; z-index: 4; display: flex; justify-content: center; gap: 10px; padding: 22px 0 12px; background: linear-gradient(transparent, #101010 42%); }
@@ -44,8 +50,11 @@ h1 { margin: 9px 0 0; font-size: clamp(2.25rem, 7vw, 5.75rem); line-height: .91;
 .lightbox-figure { display: grid; max-width: min(1100px, 100%); max-height: calc(100vh - 144px); margin: 0; justify-items: center; }
 .lightbox-figure img, .lightbox-figure video { max-width: 100%; max-height: calc(100vh - 190px); border-radius: 12px; object-fit: contain; }
 .lightbox-figure figcaption { min-height: 24px; padding-top: 12px; color: #d9d4e4; text-align: center; }
-.lightbox-close, .lightbox-nav { position: absolute; border: 0; background: rgba(255,255,255,.12); color: white; cursor: pointer; }
+.lightbox-close, .lightbox-nav, .lightbox-delete { position: absolute; border: 0; background: rgba(255,255,255,.12); color: white; cursor: pointer; }
 .lightbox-close { top: 20px; right: 24px; width: 48px; height: 48px; border-radius: 999px; font-size: 2rem; line-height: 1; }
+.lightbox-delete { top: 20px; left: 24px; width: 48px; height: 48px; border-radius: 999px; font-size: 1.4rem; line-height: 1; background: rgba(220, 38, 38, .88); display: none; place-items: center; }
+.lightbox-delete:hover { background: #ef4444; }
+.quizmaster-active #lightbox:not([hidden]) .lightbox-delete { display: grid; }
 .lightbox-nav { top: 50%; width: 52px; height: 62px; border-radius: 12px; transform: translateY(-50%); font-size: 3.5rem; font-weight: 400; line-height: .7; }
 .lightbox-previous { left: 22px; }
 .lightbox-next { right: 22px; }

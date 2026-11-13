@@ -23,6 +23,37 @@ body {
     gap: 1.5rem;
 }
 
+/* Back to Quiz Button */
+.back-nav-container {
+    width: 100%;
+    display: flex;
+    justify-content: flex-start;
+    margin-bottom: -0.5rem;
+}
+
+.back-to-quiz-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(10, 23, 82, 0.8);
+    border: 1.5px solid rgba(255, 255, 255, 0.7);
+    color: #ffffff;
+    padding: 8px 18px;
+    border-radius: 9999px;
+    font-weight: 700;
+    font-family: 'Barlow Semi Condensed', sans-serif;
+    font-size: 1.05rem;
+    text-decoration: none;
+    backdrop-filter: blur(8px);
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25);
+    transition: all 0.2s ease;
+}
+
+.back-to-quiz-btn:active {
+    transform: scale(0.96);
+    background: rgba(10, 23, 82, 0.95);
+}
+
 /* Header */
 .header {
     text-align: center;

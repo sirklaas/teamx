@@ -14,7 +14,7 @@
     <main class="page-shell">
         <header class="show-header" aria-live="polite">
             <p id="showDate" class="show-date">TeamFun</p>
-            <p class="presented-by">Quizmaster Klaas presenteerde</p>
+            <p class="presented-by"><button type="button" id="secretQuizmasterBtn" class="secret-quizmaster-btn">Quizmaster</button> Klaas presenteerde</p>
             <h1 id="showName">De foto's en video's laden…</h1>
         </header>
 
@@ -29,6 +29,7 @@
 
     <div id="lightbox" class="lightbox" hidden role="dialog" aria-modal="true" aria-label="Grote weergave">
         <button id="lightboxClose" class="lightbox-close" type="button" aria-label="Sluiten">×</button>
+        <button id="lightboxDelete" class="lightbox-delete" type="button" aria-label="Verwijder foto of video" title="Verwijder uit database" hidden>🗑️</button>
         <button id="lightboxPrevious" class="lightbox-nav lightbox-previous" type="button" aria-label="Vorige">‹</button>
         <figure class="lightbox-figure">
             <img id="lightboxImage" alt="" hidden>

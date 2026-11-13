@@ -13,7 +13,21 @@ class TeamXMedia {
 
         this.parseUrlParams();
         this.initializeElements();
+        this.setupBackButton();
         this.initialize();
+    }
+
+    // TeamX is the hub for every game: always return to the TeamX phone page
+    // for this show. The returning-player session there restores name and team.
+    setupBackButton() {
+        const backBtn = document.getElementById('backToQuizBtn');
+        if (!backBtn) return;
+
+        const hubUrl = new URL('https://www.pinkmilk.eu/teamx/phone/');
+        if (this.showId) {
+            hubUrl.searchParams.set('showId', this.showId);
+        }
+        backBtn.href = hubUrl.toString();
     }
 
     parseUrlParams() {

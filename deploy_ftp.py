@@ -53,10 +53,25 @@ def main():
     print("✅ Connected and authenticated successfully!")
 
     base_dir = os.path.dirname(os.path.abspath(__file__))
+
+    # Upload to main domain paths (/phone, /teams, /teaminput, /teamfun)
     for d in DIRECTORIES_TO_UPLOAD:
         local_path = os.path.join(base_dir, d)
         if os.path.exists(local_path):
             remote_path = f"{REMOTE_BASE}/{d}"
+            upload_directory(ftp, local_path, remote_path)
+
+    # Upload to /teamx/ subpaths (/teamx/phone, /teamx/teams, /teamx/teaminput)
+    teamx_remote_base = f"{REMOTE_BASE}/teamx"
+    try:
+        ftp.mkd(teamx_remote_base)
+    except Exception:
+        pass
+
+    for d in ['phone', 'teams', 'teaminput']:
+        local_path = os.path.join(base_dir, d)
+        if os.path.exists(local_path):
+            remote_path = f"{teamx_remote_base}/{d}"
             upload_directory(ftp, local_path, remote_path)
 
     ftp.quit()

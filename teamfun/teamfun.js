@@ -11,6 +11,7 @@
             this.media = [];
             this.selectedIds = new Set();
             this.selectionMode = false;
+            this.quizmasterMode = false;
             this.lightboxIndex = -1;
             this.elements = {
                 showDate: document.getElementById('showDate'),
@@ -19,11 +20,13 @@
                 mediaGrid: document.getElementById('mediaGrid'),
                 selectButton: document.getElementById('selectButton'),
                 downloadButton: document.getElementById('downloadButton'),
+                secretQuizmasterBtn: document.getElementById('secretQuizmasterBtn'),
                 lightbox: document.getElementById('lightbox'),
                 lightboxImage: document.getElementById('lightboxImage'),
                 lightboxVideo: document.getElementById('lightboxVideo'),
                 lightboxCaption: document.getElementById('lightboxCaption'),
                 lightboxClose: document.getElementById('lightboxClose'),
+                lightboxDelete: document.getElementById('lightboxDelete'),
                 lightboxPrevious: document.getElementById('lightboxPrevious'),
                 lightboxNext: document.getElementById('lightboxNext')
             };
@@ -108,6 +111,18 @@
             selectControl.addEventListener('change', () => this.toggleSelection(item.id));
             tile.appendChild(selectControl);
 
+            const deleteControl = document.createElement('button');
+            deleteControl.type = 'button';
+            deleteControl.className = 'delete-control';
+            deleteControl.textContent = '🗑️';
+            deleteControl.setAttribute('aria-label', 'Verwijder media');
+            deleteControl.setAttribute('title', 'Verwijder uit database');
+            deleteControl.addEventListener('click', event => {
+                event.stopPropagation();
+                this.deleteMedia(item.id);
+            });
+            tile.appendChild(deleteControl);
+
             if (isVideo) {
                 const video = document.createElement('video');
                 video.src = `${url}#t=0.5`;
@@ -136,8 +151,10 @@
                 this.elements.selectButton.textContent = this.selectionMode ? 'Klaar' : 'Selecteer';
                 this.updateSelectionUi();
             });
+            this.elements.secretQuizmasterBtn?.addEventListener('click', () => this.toggleQuizmasterMode());
             this.elements.downloadButton.addEventListener('click', () => this.downloadSelected());
             this.elements.lightboxClose.addEventListener('click', () => this.closeLightbox());
+            this.elements.lightboxDelete?.addEventListener('click', () => this.deleteCurrentLightboxMedia());
             this.elements.lightboxPrevious.addEventListener('click', () => this.moveLightbox(-1));
             this.elements.lightboxNext.addEventListener('click', () => this.moveLightbox(1));
             this.elements.lightbox.addEventListener('click', event => { if (event.target === this.elements.lightbox) this.closeLightbox(); });
@@ -147,6 +164,62 @@
                 if (event.key === 'ArrowLeft') this.moveLightbox(-1);
                 if (event.key === 'ArrowRight') this.moveLightbox(1);
             });
+        }
+
+        toggleQuizmasterMode() {
+            this.quizmasterMode = !this.quizmasterMode;
+            document.body.classList.toggle('quizmaster-active', this.quizmasterMode);
+            this.elements.mediaGrid.classList.toggle('quizmaster-active', this.quizmasterMode);
+            if (this.quizmasterMode) {
+                this.setStatus('Quizmaster-modus actief: klik op 🗑️ om een foto of video te verwijderen.');
+            } else {
+                this.setStatus('');
+            }
+        }
+
+        async deleteMedia(mediaId) {
+            const confirmed = window.confirm('Weet je zeker dat je deze foto/video wilt verwijderen uit de database?');
+            if (!confirmed) return;
+
+            try {
+                this.setStatus('Verwijderen…');
+                const response = await fetch('/teamfun/api/delete.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        mediaId,
+                        gameCode: this.gameCode
+                    })
+                });
+                const result = await response.json();
+                if (!response.ok || !result.success) {
+                    throw new Error(result.error || 'Verwijderen mislukt');
+                }
+
+                this.media = this.media.filter(m => m.id !== mediaId);
+                this.selectedIds.delete(mediaId);
+
+                if (this.lightboxIndex >= 0 && this.media[this.lightboxIndex]?.id === mediaId) {
+                    this.closeLightbox();
+                }
+
+                this.renderMedia();
+                this.setStatus('Item succesvol verwijderd.');
+                window.setTimeout(() => {
+                    if (this.elements.statusMessage.textContent === 'Item succesvol verwijderd.') {
+                        this.setStatus(this.quizmasterMode ? 'Quizmaster-modus actief: klik op 🗑️ om een foto of video te verwijderen.' : '');
+                    }
+                }, 3000);
+            } catch (err) {
+                console.error('Delete failed', err);
+                alert('Verwijderen is mislukt: ' + (err.message || 'Onbekende fout'));
+                this.setStatus('Verwijderen is mislukt.');
+            }
+        }
+
+        deleteCurrentLightboxMedia() {
+            if (this.lightboxIndex < 0 || !this.media[this.lightboxIndex]) return;
+            this.deleteMedia(this.media[this.lightboxIndex].id);
         }
 
         toggleSelection(id) {
