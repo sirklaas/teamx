@@ -70,7 +70,7 @@ test('phone preserves direct game-code links', async () => {
     assert.equal(visitor.currentGameId, 'booked');
 });
 
-test('the scoreboard always displays the bundled join QR', () => {
-    assert.match(read('teams/index.html'), /<img src="join-qr\.png"[^>]+class="qr-code"/);
+test('the player divider always displays the bundled join QR', () => {
+    assert.match(read('teams/index.html'), /<img src="join-qr\.png(?:\?v=\d+)?"[^>]+class="qr-code"/);
     assert.doesNotMatch(read('teams/script-new.js'), /qr-code|qrImage/);
 });
