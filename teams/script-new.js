@@ -49,6 +49,7 @@ class TeamXDisplay {
                 }
                 await this.authenticatePocketBase();
                 await this.loadGameData();
+                if (!this.gameRecord) return;
                 await this.loadAndDisplayTeams();
                 await this.loadLatestPhotos();
                 this.isFirstLoad = false;
@@ -105,33 +106,22 @@ class TeamXDisplay {
                 }
             }
 
-            // Active show lookup: Priority is strictly leading (1 first, then 2, 3...)
-            // with newest created (-created) as secondary sort for ties
             if (records.length === 0) {
-                records = await this.pb.collection(CONFIG.COLLECTION_TEAMS).getFullList({
-                    filter: 'priority > 0',
-                    sort: 'priority,-created',
+                const page = await this.pb.collection(CONFIG.COLLECTION_TEAMS).getList(1, 1, {
+                    filter: 'priority = 1',
+                    sort: '-created,id',
                     $autoCancel: false
                 });
-                console.log('Active priority records found:', records.length);
-            }
-
-            // Fallback: Fetch most recently updated show in database if no priority > 0 exists
-            if (records.length === 0) {
-                console.log('No active game found by priority. Fetching most recently updated show...');
-                records = await this.pb.collection(CONFIG.COLLECTION_TEAMS).getFullList({
-                    sort: '-updated',
-                    perPage: 1,
-                    $autoCancel: false
-                });
-                console.log('Most recently updated records found:', records.length);
+                records = page.items;
             }
 
             if (records.length === 0) {
-                throw new Error('No game record found in database');
+                this.elements.showName.textContent = 'Er is nog geen quiz actief. Vernieuw de pagina zodra de quiz begint.';
+                this.elements.teamsContainer.replaceChildren();
+                this.setStatus('idle');
+                return;
             }
 
-            // Take the first record
             this.gameRecord = records[0];
             this.gameRecord.teamnumber = Math.max(1, parseInt(this.gameRecord.teamnumber, 10) || 1);
             this.currentGameId = this.gameRecord.id;
@@ -142,20 +132,12 @@ class TeamXDisplay {
             // Set CSS variable for team count
             this.setTeamCountCSS(this.gameRecord.teamnumber);
 
-            // Update QR Code to direct players to this specific show
-            const qrImage = document.querySelector('.qr-code');
-            if (qrImage) {
-                const phoneUrl = `https://www.pinkmilk.eu/teamx/phone/?showId=${encodeURIComponent(this.currentGameId)}`;
-                qrImage.src = `https://api.qrserver.com/v1/create-qr-code/?size=400x400&data=${encodeURIComponent(phoneUrl)}`;
-            }
-
             console.log('Game loaded:', this.gameRecord.show);
             console.log('Show date:', this.gameRecord.datum);
             console.log('Priority:', this.gameRecord.priority);
             console.log('Number of teams:', this.gameRecord.teamnumber);
         } catch (error) {
             console.error('Error loading game data:', error);
-            this.elements.showName.textContent = 'Geen actieve quiz gevonden (zet priority op 1 of 2)';
             throw error;
         }
     }
@@ -631,6 +613,11 @@ class TeamXDisplay {
         const statusText = this.elements.statusText;
 
         switch (status) {
+            case 'idle':
+                statusDot.style.background = '#aaa';
+                statusDot.style.boxShadow = 'none';
+                statusText.textContent = 'Wachten op quiz';
+                break;
             case 'live':
                 statusDot.style.background = '#00ff00';
                 statusDot.style.boxShadow = '0 0 10px rgba(0, 255, 0, 0.5)';

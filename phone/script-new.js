@@ -58,6 +58,9 @@ class TeamXRegistration {
                     console.log(`Retrying initialization (attempt ${attempt}/${maxRetries})...`);
                 }
                 await this.loadGameData();
+                if (!this.gameRecord) return;
+                this.elements.playerNameInput.disabled = false;
+                this.elements.enterButton.disabled = false;
                 this.restoreReturningPlayer();
                 this.setupRealtimeUpdates();
                 return; // Success! Exit the function
@@ -107,33 +110,20 @@ class TeamXRegistration {
                 }
             }
 
-            // Active show lookup: Priority is strictly leading (1 first, then 2, 3...)
-            // with newest created (-created) as secondary sort for ties
             if (records.length === 0) {
-                records = await this.pb.collection(CONFIG.COLLECTION_TEAMS).getFullList({
-                    filter: 'priority > 0',
-                    sort: 'priority,-created',
+                const page = await this.pb.collection(CONFIG.COLLECTION_TEAMS).getList(1, 1, {
+                    filter: 'priority = 1',
+                    sort: '-created,id',
                     $autoCancel: false
                 });
-                console.log('Active priority records found:', records.length);
-            }
-
-            // Fallback: Fetch most recently updated show in database if no priority > 0 exists
-            if (records.length === 0) {
-                console.log('No active game found by priority. Fetching most recently updated show...');
-                records = await this.pb.collection(CONFIG.COLLECTION_TEAMS).getFullList({
-                    sort: '-updated',
-                    perPage: 1,
-                    $autoCancel: false
-                });
-                console.log('Most recently updated records found:', records.length);
+                records = page.items;
             }
 
             if (records.length === 0) {
-                throw new Error('No active game found in database');
+                this.elements.showName.textContent = 'Er is nog geen quiz actief. Vernieuw de pagina zodra de quiz begint.';
+                return;
             }
 
-            // Take the first record (latest date/created)
             this.gameRecord = records[0];
             this.currentGameId = this.gameRecord.id;
             this.totalTeams = Math.max(1, parseInt(this.gameRecord.teamnumber, 10) || 1);
@@ -149,7 +139,6 @@ class TeamXRegistration {
             console.log('Total teams:', this.totalTeams);
         } catch (error) {
             console.error('Error loading game data:', error);
-            this.elements.showName.textContent = 'Geen actieve quiz gevonden (zet priority op 1 of 2)';
             throw error;
         }
     }
@@ -232,7 +221,7 @@ class TeamXRegistration {
 
     async handleNameSubmission() {
         const name = this.elements.playerNameInput.value.trim();
-        if (!name) return;
+        if (!name || !this.currentGameId) return;
 
         // Disable input and button immediately to prevent multiple clicks
         this.elements.playerNameInput.disabled = true;
