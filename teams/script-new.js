@@ -11,6 +11,7 @@ class TeamXDisplay {
         this.playersByTeam = {};
         this.autoRefreshInterval = null;
         this.isFirstLoad = true;
+        this.rosterRevision = 0;
         this.isAnnouncing = false;
         this.announcementQueue = [];
         this.queuedPlayerNumbers = new Set();
@@ -50,9 +51,11 @@ class TeamXDisplay {
                 await this.loadGameData();
                 if (!this.gameRecord) return;
                 this.displayPlayers(this.gameRecord.playerData || []);
-                await this.loadLatestPhotos();
                 this.isFirstLoad = false;
                 await this.setupRealtimeUpdates();
+                // Catch joins between the initial game lookup and subscription.
+                await this.loadAndDisplayTeams();
+                await this.loadLatestPhotos();
                 this.setupAutoRefresh();
                 this.setupResizeHandler();
                 this.setStatus('live');
@@ -212,8 +215,9 @@ class TeamXDisplay {
 
         try {
             this.isLoading = true;
+            const revision = this.rosterRevision;
             const players = await this.loadPlayers();
-            this.displayPlayers(players);
+            if (revision === this.rosterRevision) this.displayPlayers(players);
         } catch (error) {
             console.error('Error loading teams:', error);
             throw error;
@@ -236,7 +240,7 @@ class TeamXDisplay {
             return players;
         } catch (error) {
             console.error('Error loading players:', error);
-            return [];
+            throw error;
         }
     }
 
@@ -445,6 +449,8 @@ class TeamXDisplay {
                 flyer.style.width = startRect.width + 'px';
                 flyer.style.height = startRect.height + 'px';
                 document.body.appendChild(flyer);
+                // Establish the start position before applying the CSS transition.
+                flyer.getBoundingClientRect();
 
                 // 4. Start flight
                 this.elements.announcementOverlay.classList.remove('show');
@@ -497,6 +503,7 @@ class TeamXDisplay {
 
             const teamUpdates = this.pb.collection(CONFIG.COLLECTION_TEAMS).subscribe(this.currentGameId, event => {
                 if (event.action === 'update') {
+                    this.rosterRevision++;
                     this.displayPlayers(event.record.playerData || []);
                     this.flashStatus();
                 }

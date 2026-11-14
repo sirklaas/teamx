@@ -211,48 +211,14 @@ class TeamXRegistration {
 
     async handleNameSubmission() {
         const name = this.elements.playerNameInput.value.trim();
-        if (!name || !this.currentGameId) return;
+        if (!name || !this.currentGameId || this.isProcessingQueue) return;
 
         // Disable input and button immediately to prevent multiple clicks
         this.elements.playerNameInput.disabled = true;
         this.elements.enterButton.disabled = true;
         this.showLoading(true);
 
-        try {
-            const existingPlayer = await this.checkExistingName(name);
-
-            if (existingPlayer.exists) {
-                this.showNameModal(name, existingPlayer.player);
-                this.showLoading(false);
-            } else {
-                this.addToPlayerQueue(name);
-            }
-        } catch (error) {
-            console.error('Submission error:', error);
-            this.elements.playerNameInput.disabled = false;
-            this.elements.enterButton.disabled = false;
-            this.showLoading(false);
-        }
-    }
-
-    async checkExistingName(name) {
-        try {
-            // Get playerData from show record
-            const currentShow = await this.pb.collection(CONFIG.COLLECTION_TEAMS).getOne(this.currentGameId, {
-                $autoCancel: false
-            });
-
-            const playerdata = currentShow.playerData || [];
-            const existingPlayer = playerdata.find(p => p.naam && p.naam.toLowerCase() === name.toLowerCase());
-
-            return {
-                exists: !!existingPlayer,
-                player: existingPlayer || null
-            };
-        } catch (error) {
-            console.error('Error checking existing name:', error);
-            return { exists: false, player: null };
-        }
+        this.addToPlayerQueue(name);
     }
 
     showNameModal(name, existingPlayer) {
@@ -335,7 +301,11 @@ class TeamXRegistration {
                 throw new Error(result.error || 'Registratie mislukt');
             }
 
-            this.showTeamAssignment(result.player);
+            if (result.existing) {
+                this.showNameModal(name, result.player);
+            } else {
+                this.showTeamAssignment(result.player);
+            }
         } catch (error) {
             console.error('Error creating player:', error);
             throw error;

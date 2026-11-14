@@ -66,6 +66,15 @@ if ($auth['status'] !== 200 || !is_string($token)) {
     respond(502, ['success' => false, 'error' => 'De registratie is tijdelijk niet beschikbaar.']);
 }
 
+// Both public phone URLs run on the same PHP host. Serialize the roster
+// read and write across workers, including duplicate-name retries.
+$lockPath = sys_get_temp_dir() . '/teamx-registration-' . hash('sha256', $showId) . '.lock';
+$rosterLock = fopen($lockPath, 'c');
+if ($rosterLock === false || !flock($rosterLock, LOCK_EX)) {
+    respond(503, ['success' => false, 'error' => 'Registratie is tijdelijk bezet. Probeer het opnieuw.']);
+}
+// Keep the file in place. PHP releases the lock on every request exit.
+
 $showResponse = pocketbaseRequest('GET', '/api/collections/teamx/records/' . rawurlencode($showId), $token);
 $show = $showResponse['body'];
 if ($showResponse['status'] !== 200 || !is_array($show)) {
