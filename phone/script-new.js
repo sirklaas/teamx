@@ -86,45 +86,35 @@ class TeamXRegistration {
             const urlShowId = params.get('showId') || params.get('id');
             const urlGameCode = params.get('gamecode') || params.get('code');
 
-            let records = [];
+            const collection = this.pb.collection(CONFIG.COLLECTION_TEAMS);
+            let game;
             if (urlShowId) {
                 try {
-                    console.log('Fetching show matching URL showId:', urlShowId);
-                    const record = await this.pb.collection(CONFIG.COLLECTION_TEAMS).getOne(urlShowId, {
-                        $autoCancel: false
-                    });
-                    if (record) records = [record];
-                } catch (e) {
-                    console.warn('Failed to fetch show by URL ID:', e);
+                    game = await collection.getOne(urlShowId);
+                } catch (error) {
+                    if (error.status !== 404) throw error;
                 }
             } else if (urlGameCode) {
-                try {
-                    console.log('Fetching show matching URL gamecode:', urlGameCode);
-                    const list = await this.pb.collection(CONFIG.COLLECTION_TEAMS).getFullList({
-                        filter: `gamecode = "${urlGameCode}"`,
-                        $autoCancel: false
-                    });
-                    if (list && list.length > 0) records = [list[0]];
-                } catch (e) {
-                    console.warn('Failed to fetch show by URL gamecode:', e);
-                }
-            }
-
-            if (records.length === 0) {
-                const page = await this.pb.collection(CONFIG.COLLECTION_TEAMS).getList(1, 1, {
+                const result = await collection.getList(1, 1, {
+                    filter: this.pb.filter('gamecode = {:code}', { code: urlGameCode })
+                });
+                game = result.items[0];
+            } else {
+                const result = await collection.getList(1, 1, {
                     filter: 'priority = 1',
                     sort: '-created,id',
-                    $autoCancel: false
+                    skipTotal: true
                 });
-                records = page.items;
+                game = result.items[0];
             }
 
-            if (records.length === 0) {
-                this.elements.showName.textContent = 'Er is nog geen quiz actief. Vernieuw de pagina zodra de quiz begint.';
+            if (!game) {
+                this.elements.showName.textContent = '';
+                this.elements.inputGroup.style.display = 'none';
                 return;
             }
 
-            this.gameRecord = records[0];
+            this.gameRecord = game;
             this.currentGameId = this.gameRecord.id;
             this.totalTeams = Math.max(1, parseInt(this.gameRecord.teamnumber, 10) || 1);
             this.totalPlayers = parseInt(this.gameRecord.players, 10) || 0;

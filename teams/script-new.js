@@ -47,13 +47,12 @@ class TeamXDisplay {
                 if (attempt > 1) {
                     console.log(`Retrying initialization (attempt ${attempt}/${maxRetries})...`);
                 }
-                await this.authenticatePocketBase();
                 await this.loadGameData();
                 if (!this.gameRecord) return;
-                await this.loadAndDisplayTeams();
+                this.displayPlayers(this.gameRecord.playerData || []);
                 await this.loadLatestPhotos();
                 this.isFirstLoad = false;
-                this.setupRealtimeUpdates();
+                await this.setupRealtimeUpdates();
                 this.setupAutoRefresh();
                 this.setupResizeHandler();
                 this.setStatus('live');
@@ -74,17 +73,6 @@ class TeamXDisplay {
         }
     }
 
-    async authenticatePocketBase() {
-        try {
-            console.log('Authenticating with PocketBase...');
-            await this.pb.collection("_superusers").authWithPassword(CONFIG.ADMIN_EMAIL, CONFIG.ADMIN_PASSWORD);
-            console.log('Authentication successful');
-        } catch (error) {
-            console.error('Authentication failed:', error);
-            throw new Error('Authentication failed');
-        }
-    }
-
     async loadGameData() {
         try {
             console.log('Loading game data...');
@@ -93,36 +81,31 @@ class TeamXDisplay {
             const params = new URLSearchParams(window.location.search);
             const urlShowId = params.get('showId');
             
-            let records = [];
+            const collection = this.pb.collection(CONFIG.COLLECTION_TEAMS);
+            let game;
             if (urlShowId) {
                 try {
-                    console.log('Fetching show matching URL showId:', urlShowId);
-                    const record = await this.pb.collection(CONFIG.COLLECTION_TEAMS).getOne(urlShowId, {
-                        $autoCancel: false
-                    });
-                    if (record) records = [record];
-                } catch (e) {
-                    console.warn('Failed to fetch show by URL ID:', e);
+                    game = await collection.getOne(urlShowId);
+                } catch (error) {
+                    if (error.status !== 404) throw error;
                 }
-            }
-
-            if (records.length === 0) {
-                const page = await this.pb.collection(CONFIG.COLLECTION_TEAMS).getList(1, 1, {
+            } else {
+                const result = await collection.getList(1, 1, {
                     filter: 'priority = 1',
                     sort: '-created,id',
-                    $autoCancel: false
+                    skipTotal: true
                 });
-                records = page.items;
+                game = result.items[0];
             }
 
-            if (records.length === 0) {
-                this.elements.showName.textContent = 'Er is nog geen quiz actief. Vernieuw de pagina zodra de quiz begint.';
+            if (!game) {
+                this.elements.showName.textContent = '';
                 this.elements.teamsContainer.replaceChildren();
-                this.setStatus('idle');
+                this.elements.statusText.parentElement.style.display = 'none';
                 return;
             }
 
-            this.gameRecord = records[0];
+            this.gameRecord = game;
             this.gameRecord.teamnumber = Math.max(1, parseInt(this.gameRecord.teamnumber, 10) || 1);
             this.currentGameId = this.gameRecord.id;
 
@@ -230,9 +213,7 @@ class TeamXDisplay {
         try {
             this.isLoading = true;
             const players = await this.loadPlayers();
-            console.log('Players loaded:', players.map(p => `${p.naam}(${p.playernr})`).join(', '));
-            this.playersByTeam = this.organizePlayersByTeam(players);
-            this.updateDisplay();
+            this.displayPlayers(players);
         } catch (error) {
             console.error('Error loading teams:', error);
             throw error;
@@ -257,6 +238,11 @@ class TeamXDisplay {
             console.error('Error loading players:', error);
             return [];
         }
+    }
+
+    displayPlayers(players) {
+        this.playersByTeam = this.organizePlayersByTeam(players);
+        this.updateDisplay();
     }
 
     organizePlayersByTeam(players) {
@@ -505,31 +491,19 @@ class TeamXDisplay {
         return slot;
     }
 
-    setupRealtimeUpdates() {
+    async setupRealtimeUpdates() {
         try {
             console.log('Setting up real-time updates...');
 
-            // Unsubscribe from any existing subscriptions
-            this.pb.collection(CONFIG.COLLECTION_TEAMS).unsubscribe();
-
-            // Subscribe to teamx collection updates (playerData changes)
-            this.pb.collection(CONFIG.COLLECTION_TEAMS).subscribe(this.currentGameId, async (e) => {
-                console.log('Real-time event:', e.action);
-                console.log('Event playerData length:', e.record?.playerData?.length || 0);
-
-                // Reload when playerData is updated
-                if (['update'].includes(e.action)) {
-                    // Add delay to ensure database write is fully committed
-                    setTimeout(async () => {
-                        console.log('Reloading after realtime event...');
-                        await this.loadAndDisplayTeams();
-                        this.flashStatus();
-                    }, 2000);
+            const teamUpdates = this.pb.collection(CONFIG.COLLECTION_TEAMS).subscribe(this.currentGameId, event => {
+                if (event.action === 'update') {
+                    this.displayPlayers(event.record.playerData || []);
+                    this.flashStatus();
                 }
             });
 
             // Subscribe to new media uploads
-            this.pb.collection('showmedia').subscribe('*', (e) => {
+            const photoUpdates = this.pb.collection('showmedia').subscribe('*', (e) => {
                 if (e.record.show_id !== this.currentGameId) return;
                 
                 if (e.action === 'create') {
@@ -544,9 +518,11 @@ class TeamXDisplay {
                 }
             });
 
+            await Promise.all([teamUpdates, photoUpdates]);
             console.log('Real-time updates configured');
         } catch (error) {
             console.error('Error setting up real-time updates:', error);
+            throw error;
         }
     }
 
@@ -567,6 +543,7 @@ class TeamXDisplay {
             // Spacebar for manual refresh
             if (e.key === ' ') {
                 e.preventDefault();
+                if (!this.currentGameId) return;
                 console.log('Manual refresh triggered');
                 this.loadAndDisplayTeams();
             }
@@ -602,6 +579,7 @@ class TeamXDisplay {
     }
 
     async manualRefresh() {
+        if (!this.currentGameId) return;
         console.log('Manual refresh triggered');
         this.flashStatus('refreshing');
         await this.loadAndDisplayTeams();
@@ -613,11 +591,6 @@ class TeamXDisplay {
         const statusText = this.elements.statusText;
 
         switch (status) {
-            case 'idle':
-                statusDot.style.background = '#aaa';
-                statusDot.style.boxShadow = 'none';
-                statusText.textContent = 'Wachten op quiz';
-                break;
             case 'live':
                 statusDot.style.background = '#00ff00';
                 statusDot.style.boxShadow = '0 0 10px rgba(0, 255, 0, 0.5)';

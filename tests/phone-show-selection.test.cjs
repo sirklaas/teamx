@@ -13,8 +13,8 @@ function page(folder, search, collection) {
         document: { addEventListener() {} }
     });
     return Object.assign(Object.create(prototype), {
-        pb: { collection: () => collection },
-        elements: { showName: {}, totalPlayersSpan: {}, teamsContainer: { replaceChildren() {} } },
+        pb: { collection: () => collection, filter: (expr, args) => expr.replace('{:code}', JSON.stringify(args.code)) },
+        elements: { showName: {}, statusText: { parentElement: { style: {} } }, inputGroup: { style: {} }, totalPlayersSpan: {}, teamsContainer: { replaceChildren() {} } },
         setTeamCountCSS() {}, setStatus() {}
     });
 }
@@ -38,9 +38,18 @@ for (const folder of ['phone', 'teams']) {
             if (id) assert.equal(visitor.currentGameId, id);
             else {
                 assert.ok(!visitor.currentGameId);
-                assert.match(visitor.elements.showName.textContent, /geen quiz actief/);
+                assert.equal(visitor.elements.showName.textContent, '');
             }
         }
+    });
+
+    test(folder + ' never falls back from a missing direct link', async () => {
+        const visitor = page(folder, '?showId=missing', {
+            async getOne() { throw Object.assign(new Error('Missing'), { status: 404 }); }
+        });
+        await visitor.loadGameData();
+        assert.ok(!visitor.currentGameId);
+        assert.equal(visitor.elements.showName.textContent, '');
     });
 
     test(folder + ' preserves direct show links', async () => {
@@ -52,9 +61,9 @@ for (const folder of ['phone', 'teams']) {
 
 test('phone preserves direct game-code links', async () => {
     const visitor = page('phone', '?gamecode=ABC', {
-        async getFullList(options) {
+        async getList(page, limit, options) {
             assert.equal(options.filter, 'gamecode = "ABC"');
-            return [{ id: 'booked' }];
+            return { items: [{ id: 'booked' }] };
         }
     });
     await visitor.loadGameData();
