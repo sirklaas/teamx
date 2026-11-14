@@ -34,7 +34,7 @@
     }
 
     function getTeamFunUrl(gameCode) {
-        return `https://www.pinkmilk.eu/teamfun/${encodeURIComponent(gameCode)}`;
+        return `${window.location.origin}/teamfun/${encodeURIComponent(gameCode)}`;
     }
 
     function prepareNewGameCode() {
@@ -992,7 +992,7 @@
 
             // Valid TeamX show ID for photo app upload relation
             const validShowId = recordId;
-            const photocircleUrl = `https://www.pinkmilk.eu/phone/media.html?showId=${validShowId}`;
+            const photocircleUrl = `${window.location.origin}/phone/media.html?showId=${validShowId}`;
 
             // Check if active ranking record exists (priority=1)
             let existingRanking = null;

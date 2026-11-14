@@ -16,8 +16,8 @@ const CONFIG = {
     
     // Sound effects
     SOUNDS: {
-        enter: 'https://www.pinkmilk.eu/teamx/wp-content/uploads/2024/12/success.wav',
-        reveal: 'https://www.pinkmilk.eu/teamx/wp-content/uploads/2024/12/stardust.wav'
+        enter: 'success.mp3',
+        reveal: 'stardust.mp3'
     },
     
     // UI Configuration

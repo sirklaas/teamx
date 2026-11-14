@@ -23,7 +23,7 @@ class TeamXMedia {
         const backBtn = document.getElementById('backToQuizBtn');
         if (!backBtn) return;
 
-        const hubUrl = new URL('https://www.pinkmilk.eu/teamx/phone/');
+        const hubUrl = new URL('./', window.location.href);
         if (this.showId) {
             hubUrl.searchParams.set('showId', this.showId);
         }
